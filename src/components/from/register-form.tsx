@@ -1,83 +1,72 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { Eye, EyeOff } from "lucide-react";
-import Link from "next/link";
+import { Loader2, User, Mail, Lock, Hash, Phone } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+
 import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-  FieldSeparator,
-} from "@/components/ui/field";
+  type StudentRegisterFormValues,
+  StudentRegisterSchema,
+} from "@/app/validation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Field, FieldError, FieldLabel, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-
-import z from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRegistration } from "@/hooks";
+import { useGetAllDepartment } from "../../hooks/departments.hook";
 import { toast } from "../ui/toast";
-import { Spinner } from "../ui/spinner";
-import { patientRegistrationSchema } from "@/app/validation";
-import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
 
-export function RegisterForm() {
+export default function RegisterForm() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  type PatientDefaultValues = z.infer<typeof patientRegistrationSchema>;
-
-  const defaultValues: PatientDefaultValues = {
-    name: "Mir",
-    email: "mir@gmail.com",
-    contactNumber: "01912345678",
-    password: "@User123456",
-    confirmPassword: "@User123456",
-  };
-
-  const { mutate: registration, isPending: registrationPending } =
-    useRegistration();
+  const { data: departments, isLoading: departmentsLoading } =
+    useGetAllDepartment();
+  const registerMutation = useRegistration();
 
   const form = useForm({
-    defaultValues,
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      departmentId: "",
+      studentIdCode: "",
+      phone: "",
+    } as StudentRegisterFormValues,
     validators: {
-      onSubmit: patientRegistrationSchema,
+      onChange: StudentRegisterSchema,
     },
     onSubmit: async ({ value }) => {
-      const registrationData = {
-        name: value.name,
-        email: value.email,
-        password: value.password,
-        patient: {
-          contactNumber: value.contactNumber,
-        },
-      };
-
-      registration(registrationData, {
-        onSuccess: (res) => {
-          if (!res.success) {
+      registerMutation.mutate(value, {
+        onSuccess: (response) => {
+          if (!response.success) {
             toast.add({
-              title: "Server Failure",
-              description: "Something went wrong. Please try again",
+              title: "Registration failed",
+              description:
+                response.message || "Registration failed. Please try again.",
               type: "error",
             });
+            return;
           }
 
           toast.add({
-            title: "Registration Successful",
-            description: "Please verify your account",
+            title: "Registration successful",
+            description: "Check your email for the verification code",
             type: "success",
           });
-          const params = new URLSearchParams({ email: registrationData.email });
-          router.push(`/register/verify-account?${params.toString()}`);
+          router.push(`/verify-email?email=${encodeURIComponent(value.email)}`);
         },
-        onError: (err) => {
+        onError: (error) => {
+          const message =
+            error instanceof Error ? error.message : "Registration failed";
           toast.add({
-            title: "Authorization failure",
-            description:
-              err.message || "Something went wrong. Please try again",
+            title: "Registration failed",
+            description: message,
             type: "error",
           });
         },
@@ -87,10 +76,12 @@ export function RegisterForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Create an account</h1>
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-foreground">
+          Create your student account
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your details below to create your account
+          Register with your details to start your application.
         </p>
       </div>
 
@@ -102,194 +93,238 @@ export function RegisterForm() {
         }}
       >
         <FieldGroup>
+          {/* Name */}
           <form.Field name="name">
             {(field) => {
               const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
+                field.state.meta.isTouched && field.state.meta.errors.length > 0;
               return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
+                <Field data-invalid={isInvalid} className="gap-2">
+                  <FieldLabel htmlFor={field.name}>Full name</FieldLabel>
                   <div className="relative">
+                    <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id={field.name}
                       name={field.name}
                       type="text"
-                      placeholder="John Doe"
+                      placeholder="Karim Hasan"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
                       autoComplete="name"
+                      className={cn(
+                        "h-11 pl-10",
+                        isInvalid &&
+                          "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20"
+                      )}
                     />
                   </div>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  <FieldError errors={isInvalid ? field.state.meta.errors : []} />
                 </Field>
               );
             }}
           </form.Field>
 
+          {/* Email */}
           <form.Field name="email">
             {(field) => {
               const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
+                field.state.meta.isTouched && field.state.meta.errors.length > 0;
               return (
-                <Field data-invalid={isInvalid}>
+                <Field data-invalid={isInvalid} className="gap-2">
                   <FieldLabel htmlFor={field.name}>Email</FieldLabel>
                   <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id={field.name}
                       name={field.name}
                       type="email"
-                      placeholder="m@example.com"
+                      placeholder="you@university.edu"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      autoComplete="off"
+                      autoComplete="email"
+                      className={cn(
+                        "h-11 pl-10",
+                        isInvalid &&
+                          "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20"
+                      )}
                     />
                   </div>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  <FieldError errors={isInvalid ? field.state.meta.errors : []} />
                 </Field>
               );
             }}
           </form.Field>
 
-          <form.Field name="contactNumber">
-            {(field) => {
-              const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-              return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Phone Number</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="tel"
-                      placeholder="+880 1712 345678"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      autoComplete="off"
-                    />
-                  </div>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </Field>
-              );
-            }}
-          </form.Field>
-
+          {/* Password */}
           <form.Field name="password">
             {(field) => {
               const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
-
+                field.state.meta.isTouched && field.state.meta.errors.length > 0;
               return (
-                <Field data-invalid={isInvalid}>
+                <Field data-invalid={isInvalid} className="gap-2">
                   <FieldLabel htmlFor={field.name}>Password</FieldLabel>
                   <div className="relative">
+                    <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       id={field.name}
                       name={field.name}
-                      type={showPassword ? "text" : "password"}
-                      placeholder="*********"
+                      type="password"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      className="pr-10"
-                      autoComplete="off"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
-                    >
-                      {showPassword ? (
-                        <EyeOff className="size-4" />
-                      ) : (
-                        <Eye className="size-4" />
+                      autoComplete="new-password"
+                      className={cn(
+                        "h-11 pl-10",
+                        isInvalid &&
+                          "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20"
                       )}
-                    </button>
+                    />
                   </div>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                  <FieldError errors={isInvalid ? field.state.meta.errors : []} />
                 </Field>
               );
             }}
           </form.Field>
 
-          <form.Field name="confirmPassword">
+          {/* Department */}
+          <form.Field name="departmentId">
             {(field) => {
               const isInvalid =
-                field.state.meta.isTouched && !field.state.meta.isValid;
+                field.state.meta.isTouched && field.state.meta.errors.length > 0;
               return (
-                <Field data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Confirm Password</FieldLabel>
-                  <div className="relative">
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="*********"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      className="pr-10"
-                      autoComplete="off"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-                      aria-label={
-                        showConfirmPassword ? "Hide password" : "Show password"
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="size-4" />
+                <Field data-invalid={isInvalid} className="gap-2">
+                  <FieldLabel htmlFor={field.name}>Department</FieldLabel>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(val) => field.handleChange(val)}
+                    disabled={departmentsLoading}
+                  >
+                    <SelectTrigger id={field.name} className="h-11 w-full">
+                      <SelectValue
+                        placeholder={
+                          departmentsLoading ? "Loading…" : "Select a department"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.isArray(departments) && departments.length > 0 ? (
+                        departments.map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id}>
+                            {dept.name} ({dept.code})
+                          </SelectItem>
+                        ))
                       ) : (
-                        <Eye className="size-4" />
+                        <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                          {departmentsLoading ? "Loading…" : "No departments found"}
+                        </div>
                       )}
-                    </button>
-                  </div>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    </SelectContent>
+                  </Select>
+                  <FieldError errors={isInvalid ? field.state.meta.errors : []} />
                 </Field>
               );
             }}
           </form.Field>
 
-          <Button disabled={registrationPending} type="submit">
-            {registrationPending ? (
-              <>
-                <Spinner /> submitting
-              </>
-            ) : (
-              "Submit"
+          {/* Student ID + Phone side by side on larger widths */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.Field name="studentIdCode">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && field.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={isInvalid} className="gap-2">
+                    <FieldLabel htmlFor={field.name}>Student ID</FieldLabel>
+                    <div className="relative">
+                      <Hash className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="text"
+                        placeholder="CSE-2027-001"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        className={cn(
+                          "h-11 pl-10",
+                          isInvalid &&
+                            "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20"
+                        )}
+                      />
+                    </div>
+                    <FieldError errors={isInvalid ? field.state.meta.errors : []} />
+                  </Field>
+                );
+              }}
+            </form.Field>
+
+            <form.Field name="phone">
+              {(field) => {
+                const isInvalid =
+                  field.state.meta.isTouched && field.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={isInvalid} className="gap-2">
+                    <FieldLabel htmlFor={field.name}>Phone (optional)</FieldLabel>
+                    <div className="relative">
+                      <Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="tel"
+                        placeholder="01XXXXXXXXX"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        autoComplete="tel"
+                        className={cn(
+                          "h-11 pl-10",
+                          isInvalid &&
+                            "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20"
+                        )}
+                      />
+                    </div>
+                    <FieldError errors={isInvalid ? field.state.meta.errors : []} />
+                  </Field>
+                );
+              }}
+            </form.Field>
+          </div>
+
+          {/* Submit */}
+          <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+            {([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                className="h-11 w-full text-[15px]"
+                disabled={!canSubmit || registerMutation.isPending || isSubmitting}
+              >
+                {registerMutation.isPending || isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Sending code…
+                  </>
+                ) : (
+                  "Register"
+                )}
+              </Button>
             )}
-          </Button>
+          </form.Subscribe>
         </FieldGroup>
       </form>
 
-      <FieldSeparator>Or continue with</FieldSeparator>
-
-      <GoogleLoginComponent />
-
-      <div className="text-center text-sm text-muted-foreground">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
-        <Link
-          href="/login"
-          className="font-medium underline underline-offset-4 hover:text-primary"
-        >
-          Login
-        </Link>
-      </div>
+        <a href="/login" className="font-medium text-primary hover:underline">
+          Sign in
+        </a>
+      </p>
     </div>
   );
 }

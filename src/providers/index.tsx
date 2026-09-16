@@ -1,13 +1,21 @@
 "use client";
 
 import { ReactNode } from "react";
-import QueryProvider from "./query.provider";
-import GoogleAuthProvider from "./google.Provider";
+import { ThemeProvider } from "next-themes";
+import QueryProvider from "./query.provider"; // নিশ্চিত করুন এটি default export
+import GoogleAuthProvider from "./google.Provider"; // নিশ্চিত করুন এটি default export
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
-    <GoogleAuthProvider>
-      <QueryProvider>{children}</QueryProvider>
-    </GoogleAuthProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <GoogleAuthProvider>
+        <QueryProvider>{children}</QueryProvider>
+      </GoogleAuthProvider>
+    </ThemeProvider>
   );
 }

@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Newsreader } from "next/font/google";
 
-import { LoginForm } from "@/components/from/login-from";
-import RegisterForm from "@/components/from/register-form";
+import InstructorApplyForm from "@/components/from/Instructor-from";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -18,9 +17,9 @@ const stats = [
   { value: "86", label: "Programs" },
 ];
 
-export default function RegisterPage() {
+export default function InstructorApply() {
   return (
-    <div className={`${newsreader.variable} grid min-h-svh lg:grid-cols-[minmax(0,560px)_1fr] xl:grid-cols-[minmax(0,600px)_1fr]`}>
+    <div className={`${newsreader.variable} grid min-h-svh lg:grid-cols-[minmax(0,480px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]`}>
       {/* Form side */}
       <div className="flex flex-col gap-10 px-6 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-12">
         <Link href="/" className="flex items-center gap-3">
@@ -40,8 +39,8 @@ export default function RegisterPage() {
         </Link>
 
         <div className="flex flex-1 items-center">
-          <div className="mx-auto w-full max-w-md">
-            <RegisterForm />
+          <div className="mx-auto w-full max-w-sm">
+            <InstructorApplyForm />
           </div>
         </div>
 
@@ -57,7 +56,7 @@ export default function RegisterPage() {
           alt="Students walking across the Northfield University campus"
           fill
           priority
-          sizes="(min-width: 1024px) 50vw, 100vw"
+          sizes="(min-width: 1024px) 55vw, 100vw"
           className="object-cover dark:brightness-[0.55] dark:saturate-[0.85]"
         />
 
@@ -67,8 +66,8 @@ export default function RegisterPage() {
         {/* Overlaid brand content */}
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-8 p-12 xl:p-16">
           <p className="font-[family-name:var(--font-newsreader)] max-w-md text-[26px] italic leading-snug text-white xl:text-[30px]">
-            &ldquo;Applications, enrollment, and results — your whole academic
-            record starts with one account.&rdquo;
+            &ldquo;Everything from admissions to grading, in one place built for how a
+            university actually runs.&rdquo;
           </p>
 
           <div className="flex items-center gap-8 border-t border-white/20 pt-6">
