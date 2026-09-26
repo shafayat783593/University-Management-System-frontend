@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/app/validation";
 import { useLogin } from "@/hooks";
-import { toast } from "../ui/toast";
+import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
 
@@ -50,19 +50,11 @@ export function LoginForm({ className, ...props }: ComponentProps<"form">) {
           password: value.password,
         });
 
-        toast.add({
-          title: "Login successful",
-          description: "You have been logged in successfully.",
-          type: "success",
-        });
+        toast.success("Login successful", { description: "You have been logged in successfully." });
 
         router.push("/");
       } catch (error) {
-        toast.add({
-          title: "Login failed",
-          description: "Invalid email or password.",
-          type: "error",
-        });
+        toast.error("Login failed", { description: "Invalid email or password." });
       }
     },
   });

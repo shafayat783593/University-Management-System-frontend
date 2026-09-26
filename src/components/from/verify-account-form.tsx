@@ -16,12 +16,12 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { useEffect, useState } from "react";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { toast } from "../ui/toast";
-import { useVerifyAccount } from "@/hooks";
+import { toast } from "sonner";
+import { useVerifyAccount, useVerifyInstructorEmailVerify } from "@/hooks";
 
 const RESEND_COOLDOWN = 120;
 
-export default function VerifyAccountForm() {
+export default function VerifyAccountForm({mode}:{mode:"instructor"|"student"}) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -29,7 +29,10 @@ export default function VerifyAccountForm() {
   const [isInvalid, setIsInvalid] = useState(false);
   const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN);
 
-  const { mutate: verify, isPending: verifyPending } = useVerifyAccount();
+  const { mutate: verifyInstructor,  } = useVerifyInstructorEmailVerify();
+  const { mutate: verifySudent } = useVerifyAccount();
+
+  const verify = mode === "instructor" ? verifyInstructor : verifySudent;
 
   const email = searchParams.get("email") || "";
 
@@ -65,26 +68,25 @@ export default function VerifyAccountForm() {
     verify(verifyData, {
       onSuccess: (res) => {
         if (!res.success) {
-          toast.add({
-            title: "Server Failure",
-            description: "Something went wrong. Please try again",
-            type: "error",
-          });
+          toast.error("Server Failure", { description: "Something went wrong. Please try again" });
         }
 
-        toast.add({
-          title: "Verification Successful",
-          description: "Welcome onboard",
-          type: "success",
-        });
+        if (mode === "instructor") {
+          
+          toast.success("Verification Successful", { description: "An admin will Apporve Your account .This may take time .Place check you email in few hours" });
+          router.push("/");
+          return;
+        }
+        else {
+          
+            toast.success("Verification Successful", { description: "Welcome onboard" });
         router.push("/");
+        }
+
+      
       },
       onError: (err) => {
-        toast.add({
-          title: "Verification failure",
-          description: err.message || "Something went wrong. Please try again",
-          type: "error",
-        });
+        toast.error("Verification failure", { description: err.message || "Something went wrong. Please try again" });
       },
     });
   };

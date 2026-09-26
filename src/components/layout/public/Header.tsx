@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 
 
-import { toast } from "@/components/ui/toast"
+import { toast } from "sonner"
 import { getDashboardHome, getNavForRole, roleLabel } from "./navconfig"
 import { ThemeToggle } from "./ThemeToggle"
 import { useGetMe, useLogout } from "@/hooks/auth.hook"
@@ -25,7 +25,7 @@ type MeUser = {
   _id?: string
   name?: string
   email?: string
-  role?: "admin" | "faculty" | "student"
+  role?: "ADMIN" | "INSTRUCTOR" | "STUDENT"
   avatar?: string
   studentId?: string
 }
@@ -46,12 +46,15 @@ export function Navbar() {
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useGetMe()
+
+  console.log("current user ",data)
   const { mutate: logout, isPending } = useLogout()
 
   // Works whether your API returns the user directly or wrapped in { data }.
   const user: MeUser | undefined = (data as any)?.data ?? (data as MeUser | undefined)
-  const role = user?.role
-
+const role = user?.role?.toLowerCase();  
+  
+console.log(role)
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -84,22 +87,14 @@ export function Navbar() {
   const handelLogout = () => {
     logout(undefined, {
       onSuccess: () => {
-        toast.add({
-          title: "logged out",
-          description: "Logged Out Successfully",
-          type: "success",
-        })
+        toast.success("logged out", { description: "Logged Out Successfully" })
         queryClient.removeQueries({ queryKey: ["user"] })
         setProfileOpen(false)
         setMenuOpen(false)
         router.push("/login")
       },
       onError: () => {
-        toast.add({
-          title: "logged out faile",
-          description: "Something went wrong",
-          type: "error",
-        })
+        toast.error("logged out faile", { description: "Something went wrong" })
       },
     })
   }

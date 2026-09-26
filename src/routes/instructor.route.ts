@@ -1,34 +1,34 @@
-
-
+import {
+  BookOpen,
+  CalendarDays,
+  LayoutDashboard,
+  PlusCircle,
+  Users,
+  UserRound,
+} from "lucide-react";
+import type { SidebarItems } from "@/components/types/sidebar.type";
 
 const prefix = "/instructor";
 
-export const instructorRoutes = [
+export const instructorRoutes: SidebarItems = [
   {
-    title: "Schedule",
+    title: "Teaching",
     items: [
+      { title: "Overview", url: `${prefix}`, icon: LayoutDashboard },
+      { title: "My Courses", url: `${prefix}/courses`, icon: BookOpen },
       {
-        title: "Overview",
-        url: `${prefix}`,
+        title: "Create Course",
+        url: `${prefix}/courses/new`,
+        icon: PlusCircle,
       },
-      {
-        title: "Create Schedule",
-        url: `${prefix}`,
-      },
+      { title: "Students", url: `${prefix}/students`, icon: Users },
     ],
   },
   {
-    title: "App Settings",
+    title: "Schedule",
     items: [
-      {
-        title: "Routing",
-        url: "#",
-      },
-      {
-        title: "Data Fetching",
-        url: "#",
-        isActive: true,
-      },
+      { title: "Class Schedule", url: `${prefix}/schedule`, icon: CalendarDays },
+      { title: "Profile", url: `${prefix}/profile`, icon: UserRound },
     ],
   },
 ];

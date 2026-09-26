@@ -9,11 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { toast } from "@/components/ui/toast";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type Values = { name: string; email: string; departmentId: string; qualification: string; resume: File | null };
 
+
 export default function InstructorApplyForm() {
+    const router = useRouter()
+      
     const { data: departments = [], isLoading: departmentsLoading } = useGetAllDepartment();
     const { mutateAsync: applyAsInstructor, isPending } = useApplyAsInstructor();
     const form = useForm({
@@ -22,10 +26,17 @@ export default function InstructorApplyForm() {
             if (!value.resume) return;
             try {
                 await applyAsInstructor({ ...value, resume: value.resume });
-                toast.add({ title: "Application submitted", description: "Check your email for the verification OTP.", type: "success" });
+                toast.success("Application submitted", { description: "Check your email for the verification OTP." });
+                               const params = new URLSearchParams({
+              email: value.email,
+              mode: "instructor",
+            }); 
+                
+                router.push(`/account-verify?${params.toString()}`);
+
                 form.reset();
             } catch {
-                toast.add({ title: "Could not submit application", description: "Please review your details and try again.", type: "error" });
+                toast.error("Could not submit application", { description: "Please review your details and try again." });
             }
         },
     });

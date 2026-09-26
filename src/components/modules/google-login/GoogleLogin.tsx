@@ -1,6 +1,6 @@
 "use client";
 
-import { toast } from "@/components/ui/toast";
+import { toast } from "sonner";
 import { useGoogleOAuth } from "@/hooks";
 import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
@@ -13,11 +13,7 @@ export default function GoogleLoginComponent() {
     const idToken = credentialResponse.credential;
 
     if (!idToken) {
-      toast.add({
-        title: "Google OAuth Failed",
-        description: "Something went wrong. Please try again",
-        type: "error",
-      });
+      toast.error("Google OAuth Failed", { description: "Something went wrong. Please try again" });
       return;
     }
 
@@ -25,31 +21,18 @@ export default function GoogleLoginComponent() {
       { idToken },
       {
         onSuccess: () => {
-          toast.add({
-            title: "Logged in Successfully",
-            description: "Welcome back",
-            type: "success",
-          });
+          toast.success("Logged in Successfully", { description: "Welcome back" });
           router.push("/");
         },
         onError: (err) => {
-          toast.add({
-            title: "Google OAuth Failed",
-            description:
-              err.message || "Something went wrong. Please try again",
-            type: "error",
-          });
+          toast.error("Google OAuth Failed", { description: err.message || "Something went wrong. Please try again" });
         },
       },
     );
   };
 
   const handleGoogleError = () => {
-    toast.add({
-      title: "Google OAuth Failed",
-      description: "Something went wrong. Please try again",
-      type: "error",
-    });
+    toast.error("Google OAuth Failed", { description: "Something went wrong. Please try again" });
   };
 
   return (

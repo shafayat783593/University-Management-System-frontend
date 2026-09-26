@@ -1,31 +1,30 @@
+import {
+  BookOpen,
+  CreditCard,
+  GraduationCap,
+  LayoutDashboard,
+  Trophy,
+  UserRound,
+} from "lucide-react";
+import type { SidebarItems } from "@/components/types/sidebar.type";
+
 const prefix = "/student";
 
-export const studentRoutes = [
+export const studentRoutes: SidebarItems = [
   {
-    title: "Bookings",
+    title: "Learning",
     items: [
-      {
-        title: "Overview",
-        url: `${prefix}`,
-      },
-      {
-        title: "Payment History",
-        url: `${prefix}`,
-      },
+      { title: "Overview", url: `${prefix}`, icon: LayoutDashboard },
+      { title: "My Courses", url: `${prefix}/courses`, icon: BookOpen },
+      { title: "Enroll", url: `${prefix}/enroll`, icon: GraduationCap },
+      { title: "Results", url: `${prefix}/results`, icon: Trophy },
     ],
   },
   {
-    title: "App Settings",
+    title: "Account",
     items: [
-      {
-        title: "Routing",
-        url: "#",
-      },
-      {
-        title: "Data Fetching",
-        url: "#",
-        isActive: true,
-      },
+      { title: "Payments", url: `${prefix}/payments`, icon: CreditCard },
+      { title: "Profile", url: `${prefix}/profile`, icon: UserRound },
     ],
   },
 ];

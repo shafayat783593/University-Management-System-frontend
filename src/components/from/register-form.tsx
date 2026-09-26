@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useRegistration } from "@/hooks";
 import { useGetAllDepartment } from "../../hooks/departments.hook";
-import { toast } from "../ui/toast";
+import { toast } from "sonner";
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -45,30 +45,17 @@ export default function RegisterForm() {
       registerMutation.mutate(value, {
         onSuccess: (response) => {
           if (!response.success) {
-            toast.add({
-              title: "Registration failed",
-              description:
-                response.message || "Registration failed. Please try again.",
-              type: "error",
-            });
+            toast.error("Registration failed", { description: response.message || "Registration failed. Please try again." });
             return;
           }
 
-          toast.add({
-            title: "Registration successful",
-            description: "Check your email for the verification code",
-            type: "success",
-          });
-          router.push(`/verify-email?email=${encodeURIComponent(value.email)}`);
+          toast.success("Registration successful", { description: "Check your email for the verification code" });
+          router.push(`/account-verify?email=${encodeURIComponent(value.email)}&mode=student`);
         },
         onError: (error) => {
           const message =
             error instanceof Error ? error.message : "Registration failed";
-          toast.add({
-            title: "Registration failed",
-            description: message,
-            type: "error",
-          });
+          toast.error("Registration failed", { description: message });
         },
       });
     },
