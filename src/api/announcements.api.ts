@@ -1,24 +1,13 @@
 import apiClient from "@/lib/apiClient";
 import type {
   Announcement,
-  PaginatedMeta,
+  ApiResponse,
+  Meta,
   SemesterCalendar,
 } from "@/components/types";
 
-interface AnnouncementsListResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  // NOTE: backend nests list payload as data: { data, meta }
-  data: { data: Announcement[]; meta: PaginatedMeta };
-}
-
-interface AnnouncementDetailResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: Announcement;
-}
+// Backend `GET /announcements` wraps the paginated payload inside `data`:
+// { success, statusCode, message, data: { data: Announcement[], meta: Meta } }
 
 export async function getPublishedAnnouncements(params?: {
   page?: number;
@@ -28,28 +17,22 @@ export async function getPublishedAnnouncements(params?: {
   if (params?.page) query.set("page", String(params.page));
   if (params?.limit) query.set("limit", String(params.limit));
   const qs = query.toString();
-  const res = await apiClient<AnnouncementsListResponse>(
+  // ofetch resolves with the response body directly (no axios-style `.data` wrapper).
+  const res = await apiClient<ApiResponse<Announcement[]>>(
     `/announcements${qs ? `?${qs}` : ""}`,
   );
-  return { items: res.data.data, meta: res.data.meta };
+  return { items: res.data ?? [], meta: res. meta};
 }
 
 export async function getAnnouncementById(id: string) {
-  const res = await apiClient<AnnouncementDetailResponse>(
+  const res = await apiClient<ApiResponse<Announcement>>(
     `/announcements/${id}`,
   );
   return res.data;
 }
 
-interface SemesterCalendarResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: SemesterCalendar;
-}
-
 export async function getSemesterCalendar(id: string) {
-  const res = await apiClient<SemesterCalendarResponse>(
+  const res = await apiClient<ApiResponse<SemesterCalendar>>(
     `/semesters/${id}/calendar`,
   );
   return res.data;

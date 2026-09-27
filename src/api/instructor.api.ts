@@ -1,7 +1,13 @@
-import { VerifyAccountPayload, type GetInstructorApplicationsParams, type InstructorApplication, type InstructorApplicationsMeta, type ReviewInstructorPayload } from "@/components/types";
+import {
+  ApiResponse,
+  VerifyAccountPayload,
+ GetInstructorApplicationsParams,
+   InstructorApplication,
+  ReviewInstructorPayload,
+  ApplyAsInstructorPayload
+} from "@/components/types";
 import apiClient from "@/lib/apiClient";
 
-export type ApplyAsInstructorPayload = { name: string; email: string; departmentId: string; qualification: string; resume: File };
 
 export function applyAsInstructor({ resume, ...data }: ApplyAsInstructorPayload) {
   const body = new FormData();
@@ -15,18 +21,12 @@ export function applyAsInstructor({ resume, ...data }: ApplyAsInstructorPayload)
 
 
 
-export const verifyInstructorEmailVerify = (payload:VerifyAccountPayload) => {
-  return apiClient("instructors/verify-email",{ method: "POST", body: payload })
-  
+export const verifyInstructorEmailVerify = (payload: VerifyAccountPayload) => {
+  return apiClient("instructors/verify-email", { method: "POST", body: payload })
+
 }
 
-export interface InstructorApplicationsResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: InstructorApplication[];
-  meta: InstructorApplicationsMeta;
-}
+
 
 export function getAllInstructorApplications(params: GetInstructorApplicationsParams = {}) {
   const query = new URLSearchParams();
@@ -41,7 +41,7 @@ export function getAllInstructorApplications(params: GetInstructorApplicationsPa
   if (params.sortOrder) query.set("sortOrder", params.sortOrder);
 
   const qs = query.toString();
-  return apiClient<InstructorApplicationsResponse>(
+  return apiClient<ApiResponse<InstructorApplication[]>>(
     `/instructors${qs ? `?${qs}` : ""}`,
     { method: "GET" },
   );

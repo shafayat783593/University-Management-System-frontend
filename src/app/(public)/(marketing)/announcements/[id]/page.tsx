@@ -15,6 +15,7 @@ export const revalidate = 300;
 export async function generateStaticParams() {
   try {
     const { items } = await getPublishedAnnouncements({ page: 1, limit: 20 });
+    if (!Array.isArray(items)) return [];
     return items.map((a) => ({ id: a.id }));
   } catch {
     // Backend may be unreachable at build time — fall back to

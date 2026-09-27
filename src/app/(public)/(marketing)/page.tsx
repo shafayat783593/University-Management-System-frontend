@@ -25,7 +25,7 @@ async function getDepartments(): Promise<Department[]> {
 async function getPreview(): Promise<Announcement[]> {
   try {
     const { items } = await getPublishedAnnouncements({ page: 1, limit: 3 });
-    return items;
+    return Array.isArray(items) ? items : [];
   } catch {
     return [];
   }
@@ -40,10 +40,11 @@ function formatDate(value: string) {
 }
 
 export default async function HomePage() {
-  const [departments, announcements] = await Promise.all([
+  const [departments, preview] = await Promise.all([
     getDepartments(),
     getPreview(),
   ]);
+  const announcements: Announcement[] = Array.isArray(preview) ? preview : [];
 
   return (
     <div className="flex flex-col">

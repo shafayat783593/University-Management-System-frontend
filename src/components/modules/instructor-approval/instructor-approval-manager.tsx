@@ -1,36 +1,41 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import { DashboardPanel } from "@/components/dashboard/dashboard-ui";
 import { Input } from "@/components/ui/input";
 import { useGetInstructorApplications } from "@/hooks";
-import type { InstructorApplication } from "@/components/types";
+import type { InstructorApplication, GetInstructorApplicationsParams } from "@/components/types";
 import InstructorApprovalTable from "./instructor-approval-table";
 import InstructorApprovalTableLoading from "./instructor-approval-table-loading";
-import InstructorApprovalTabs, { type ApprovalTab } from "./instructor-approval-tabs";
 import InstructorReviewSheet from "./instructor-review-sheet";
+import useDebounce from "@/hooks/searchDebounce.hook";
+import InstructorApprovalTabs, { ApprovalTab } from "./instructor-approval-tabs";
 
 const PAGE_SIZE = 10;
 
 export default function InstructorApprovalManager() {
   const [tab, setTab] = useState<ApprovalTab>("PENDING");
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selected, setSelected] = useState<InstructorApplication | null>(null);
-  const debounceRef = useRef<number | undefined>(undefined);
+  const [searchInput, setSearchInput] = useState("");
 
-  const { data, isLoading, isError, refetch } = useGetInstructorApplications({
+  const debouncedSearch = useDebounce(searchInput, 500);
+
+
+  const param : GetInstructorApplicationsParams={
     page,
     limit: PAGE_SIZE,
     verificationStatus: tab,
     searchTerm: debouncedSearch || undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
-  });
+  }
+  const { data, isLoading, isError, refetch } = useGetInstructorApplications(param);
 
-  const applications = data?.data ?? [];
+
+
+  const applications: InstructorApplication[] = data?.data ?? [];
   const meta = data?.meta;
 
   const handleTabChange = (value: ApprovalTab) => {
@@ -38,13 +43,9 @@ export default function InstructorApprovalManager() {
     setPage(1);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    window.clearTimeout(debounceRef.current);
-    debounceRef.current = window.setTimeout(() => {
-      setDebouncedSearch(value.trim());
-      setPage(1);
-    }, 400);
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+    setPage(1);
   };
 
   return (
@@ -60,8 +61,8 @@ export default function InstructorApprovalManager() {
           <div className="relative w-full sm:w-64">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              value={searchInput}
+              onChange={(e) => handleSearch(e)}
               placeholder="Search name or email…"
               className="pl-9"
             />
@@ -91,7 +92,7 @@ export default function InstructorApprovalManager() {
         ) : (
           <InstructorApprovalTable
             applications={applications}
-            page={meta?.page ?? page}
+            page={data?.meta?.page ?? page}
             totalPages={meta?.totalPages ?? 1}
             onPageChange={(p) => setPage(p)}
             onReview={(app) => setSelected(app)}

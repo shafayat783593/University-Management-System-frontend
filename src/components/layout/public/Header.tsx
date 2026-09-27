@@ -18,7 +18,7 @@ import {
 import { toast } from "sonner"
 import { getDashboardHome, getNavForRole, roleLabel } from "./navconfig"
 import { ThemeToggle } from "./ThemeToggle"
-import { useGetMe, useLogout } from "@/hooks/auth.hook"
+import { useGetMe, useLogout, ME_QUERY_KEY } from "@/hooks/auth.hook"
 
 
 type MeUser = {
@@ -46,15 +46,11 @@ export function Navbar() {
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useGetMe()
-
-  console.log("current user ",data)
   const { mutate: logout, isPending } = useLogout()
 
   // Works whether your API returns the user directly or wrapped in { data }.
   const user: MeUser | undefined = (data as any)?.data ?? (data as MeUser | undefined)
 const role = user?.role?.toLowerCase();  
-  
-console.log(role)
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -88,7 +84,7 @@ console.log(role)
     logout(undefined, {
       onSuccess: () => {
         toast.success("logged out", { description: "Logged Out Successfully" })
-        queryClient.removeQueries({ queryKey: ["user"] })
+        queryClient.removeQueries({ queryKey: ME_QUERY_KEY })
         setProfileOpen(false)
         setMenuOpen(false)
         router.push("/login")

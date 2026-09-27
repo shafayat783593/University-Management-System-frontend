@@ -1,12 +1,34 @@
 import {
+  changePassword,
   getMe,
   googleOAuth,
+  updateProfileImage,
+  updateStudentProfile,
   userLogin,
   userLogout,
   userRegistration,
   verifyAccount,
+
 } from "@/api";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import type { ApiResponse, ChangePasswordPayload, MeUser } from "@/components/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { FetchError } from "ofetch";
+
+export const ME_QUERY_KEY = ["me"] as const;
+
+/** Extract the backend's `{ message }` from a caught `FetchError`. */
+export function getApiErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof FetchError) {
+    const message = (error.data as { message?: unknown } | undefined)?.message;
+    if (typeof message === "string" && message.length > 0) return message;
+  }
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
+}
+
+function isUnauthorized(error: unknown) {
+  return error instanceof FetchError && error.status === 401;
+}
 
 export function useLogin() {
   return useMutation({
@@ -38,10 +60,46 @@ export function useGoogleOAuth() {
   });
 }
 
+
 export function useGetMe() {
   return useQuery({
-    queryKey: ["user"],
+    queryKey: ME_QUERY_KEY,
     queryFn: getMe,
-    retry: false,
+    retry: (failureCount, error) => {
+      if (isUnauthorized(error)) return false;
+      return failureCount < 1;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export const useAuth = useGetMe;
+
+
+export function useUpdateProfileImage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateProfileImage,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
+    },
+  });
+}
+
+
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn:changePassword
+  });
+}
+
+export function useUpdateStudentProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateStudentProfile,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
+    },
   });
 }
