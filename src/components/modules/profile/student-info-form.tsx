@@ -15,7 +15,10 @@ import { getApiErrorMessage, useGetMe, useUpdateStudentProfile } from "@/hooks";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-type FieldName = keyof StudentInfoFormValues;
+// type FieldName = keyof StudentInfoFormValues;
+
+type  FieldName = keyof StudentInfoFormValues
+
 
 const FIELDS: { name: FieldName; label: string; placeholder?: string; type?: string }[] = [
   { name: "phone", label: "Phone", placeholder: "017XXXXXXXX" },

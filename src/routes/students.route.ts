@@ -1,7 +1,9 @@
 import {
   BookOpen,
+  CalendarCheck,
   CreditCard,
   GraduationCap,
+  IdCard,
   LayoutDashboard,
   Trophy,
   UserRound,
@@ -15,16 +17,27 @@ export const studentRoutes: SidebarItems = [
     title: "Learning",
     items: [
       { title: "Overview", url: `${prefix}`, icon: LayoutDashboard },
-      { title: "My Courses", url: `${prefix}/courses`, icon: BookOpen },
-      { title: "Enroll", url: `${prefix}/enroll`, icon: GraduationCap },
-      { title: "Results", url: `${prefix}/results`, icon: Trophy },
+      { title: "Enrollments", url: `${prefix}/enrollments`, icon: BookOpen },
+      {
+        title: "My Enrollments",
+        url: `${prefix}/enrollments/my`,
+        icon: GraduationCap,
+      },
+      { title: "Attendance", url: `${prefix}/attendance`, icon: CalendarCheck },
+      { title: "Transcript", url: `${prefix}/results/transcript`, icon: Trophy },
     ],
   },
   {
     title: "Account",
     items: [
-      { title: "Payments", url: `${prefix}/payments`, icon: CreditCard },
-      { title: "Profile", url: `${prefix}/profile`, icon: UserRound },
+      { title: "My Fees", url: `${prefix}/payments/my-fees`, icon: CreditCard },
+      { title: "ID Card", url: `${prefix}/id-card`, icon: IdCard },
+      { title: "Profile", url: "/profile", icon: UserRound },
+      {
+        title: "Additional Info",
+        url: `${prefix}/profile-info`,
+        icon: UserRound,
+      },
     ],
   },
 ];

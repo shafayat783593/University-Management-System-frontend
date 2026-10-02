@@ -27,7 +27,7 @@ export default function StudentOverview() {
         subtitle="Track your courses, results and upcoming deadlines."
         action={
           <Link
-            href="/student/enroll"
+            href="/student/enrollments"
             className="gradient-brand inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white shadow-pop transition-opacity hover:opacity-90"
           >
             Enroll in course
@@ -44,7 +44,7 @@ export default function StudentOverview() {
           subtitle="Pick up where you left off"
           className="lg:col-span-3"
           action={
-            <Link href="/student/courses" className="text-[13px] font-semibold text-primary hover:underline">
+            <Link href="/student/enrollments/my" className="text-[13px] font-semibold text-primary hover:underline">
               All courses
             </Link>
           }

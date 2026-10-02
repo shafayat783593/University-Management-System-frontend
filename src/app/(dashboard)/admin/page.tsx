@@ -26,8 +26,8 @@ const pending = [
 ];
 
 const quickLinks = [
-  { title: "Approve instructors", href: "/admin/approved-instructor", desc: "Review 12 pending applications" },
-  { title: "Manage students", href: "/admin/students", desc: "Enrollment, records & status" },
+  { title: "Approve instructors", href: "/admin/instructor-applications", desc: "Review pending applications" },
+  { title: "Manage departments", href: "/admin/departments", desc: "Faculties & departments" },
   { title: "Manage courses", href: "/admin/courses", desc: "Curriculum & semesters" },
 ];
 
@@ -39,7 +39,7 @@ export default function AdminOverview() {
         subtitle="Here's what's happening across your university today."
         action={
           <Link
-            href="/admin/approved-instructor"
+            href="/admin/instructor-applications"
             className="gradient-brand inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white shadow-pop transition-opacity hover:opacity-90"
           >
             Review approvals
@@ -57,7 +57,7 @@ export default function AdminOverview() {
           className="lg:col-span-3"
           action={
             <Link
-              href="/admin/approved-instructor"
+              href="/admin/instructor-applications"
               className="text-[13px] font-semibold text-primary hover:underline"
             >
               View all

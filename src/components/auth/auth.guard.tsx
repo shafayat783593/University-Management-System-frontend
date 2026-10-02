@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 import AuthLoading from "./auth.loading";
 import { useGetMe } from "@/hooks";
@@ -8,6 +8,7 @@ import { useGetMe } from "@/hooks";
 
 export default function AuthGuard({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const { data, isPending, isError } = useGetMe();
 
@@ -19,8 +20,13 @@ export default function AuthGuard({ children }: { children: ReactNode }) {
     }
     if (isError || !user) {
       router.replace("/login");
+      return;
     }
-  }, [isPending, isError, user]);
+    // First-login instructors must change the temp password before going anywhere else.
+    if (user.needPasswordChange && pathname !== "/profile") {
+      router.replace("/profile");
+    }
+  }, [isPending, isError, user, pathname]);
 
   if (isPending) {
     return <AuthLoading/>;

@@ -42,26 +42,23 @@ export const dashboardHome: Record<Role, string> = {
 /** Top-level links per role. Keep this to 5–6 items; the rest lives in the sidebar. */
 export const roleNav: Record<Role, NavItem[]> = {
   admin: [
-    { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    { label: "Students", href: "/admin/students", icon: Users },
-    { label: "Faculty", href: "/admin/instructor", icon: UserCog },
+    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { label: "Departments", href: "/admin/departments", icon: Building2 },
     { label: "Courses", href: "/admin/courses", icon: BookOpen },
     { label: "Semesters", href: "/admin/semesters", icon: CalendarDays },
-    { label: "Settings", href: "/admin/settings", icon: Settings },
+    { label: "Sections", href: "/admin/sections", icon: Users },
+    { label: "Applications", href: "/admin/instructor-applications", icon: UserCog },
   ],
   instructor: [
     { label: "Dashboard", href: "/instructor", icon: LayoutDashboard },
-    { label: "My courses", href: "/instructor/courses", icon: BookOpen },
-    { label: "Schedule", href: "/instructor/schedule", icon: CalendarDays },
-    { label: "Grading", href: "/instructor/grades", icon: FileBarChart },
-    { label: "My students", href: "/instructor/students", icon: Users },
+    { label: "My Sections", href: "/instructor/sections", icon: BookOpen },
   ],
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
-    { label: "Registration", href: "/student/registration", icon: ClipboardList },
-    { label: "My courses", href: "/student/courses", icon: BookOpen },
-    { label: "Results", href: "/student/results", icon: FileBarChart },
-    { label: "Payments", href: "/student/payments", icon: CreditCard },
+    { label: "Enrollments", href: "/student/enrollments", icon: BookOpen },
+    { label: "My Enrollments", href: "/student/enrollments/my", icon: ClipboardList },
+    { label: "Transcript", href: "/student/results/transcript", icon: FileBarChart },
+    { label: "My Fees", href: "/student/payments/my-fees", icon: CreditCard },
   ],
 }
 

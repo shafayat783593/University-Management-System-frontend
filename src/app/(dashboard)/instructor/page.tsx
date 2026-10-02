@@ -27,7 +27,7 @@ export default function InstructorOverview() {
         subtitle="Manage your courses, students and class schedule."
         action={
           <Link
-            href="/instructor/courses/new"
+            href="/instructor/sections"
             className="gradient-brand inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white shadow-pop transition-opacity hover:opacity-90"
           >
             <PlusCircle className="size-4" />
@@ -44,7 +44,7 @@ export default function InstructorOverview() {
           subtitle="Your teaching schedule"
           className="lg:col-span-3"
           action={
-            <Link href="/instructor/schedule" className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary hover:underline">
+            <Link href="/instructor/sections" className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary hover:underline">
               Full schedule <ArrowRight className="size-3.5" />
             </Link>
           }
