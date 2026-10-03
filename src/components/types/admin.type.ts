@@ -52,3 +52,39 @@ export interface PaymentsParams {
   semesterId?: string;
   searchTerm?: string;
 }
+
+export interface Exam {
+  id: string;
+  sectionId: string;
+  title: string;
+  examType: string;
+  totalMarks: number;
+}
+
+export interface OverrideResultPayload {
+  marksObtained: number;
+  reason: string;
+}
+
+export interface DashboardSummary {
+  totals: {
+    departments: number;
+    courses: number;
+    semesters: number;
+    sections: number;
+    students: number;
+    instructors: number;
+  };
+  instructorApplications: {
+    pending: number;
+    approved: number;
+    rejected: number;
+  };
+  activeSemester: { id: string; name: string; status: string } | null;
+  enrollment: { totalEnrolledThisSemester: number };
+  finance: {
+    totalCollected: number;
+    totalPending: number;
+    totalFailedOrCancelled: number;
+  };
+}

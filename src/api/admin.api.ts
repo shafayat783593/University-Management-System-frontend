@@ -1,7 +1,10 @@
 import type {
   ApiResponse,
   Course,
+  DashboardSummary,
   Department,
+  Exam,
+  OverrideResultPayload,
   Payment,
   PaymentsParams,
 } from "@/components/types";
@@ -156,6 +159,42 @@ export async function getAllPayments(params: PaymentsParams = {}) {
     `/payments${qs ? `?${qs}` : ""}`,
   );
   return { items: res.data ?? [], meta: res.meta };
+}
+
+/* Results ---------------------------------------------------- */
+
+export async function getSectionExams(sectionId: string) {
+  const res = await apiClient<ApiResponse<Exam[]>>(
+    `/exams/sections/${sectionId}`,
+  );
+  return res.data ?? [];
+}
+
+export async function publishExamResults(examId: string) {
+  const res = await apiClient(`/results/exams/${examId}/publish`, {
+    method: "PATCH",
+  });
+  return res.data;
+}
+
+export async function overrideResult(
+  resultId: string,
+  payload: OverrideResultPayload,
+) {
+  const res = await apiClient(`/results/${resultId}/override`, {
+    method: "PATCH",
+    body: payload,
+  });
+  return res.data;
+}
+
+/* Dashboard -------------------------------------------------- */
+
+export async function getDashboardSummary() {
+  const res = await apiClient<ApiResponse<DashboardSummary>>(
+    "/dashboard/summary",
+  );
+  return res.data;
 }
 
 /* Sections (list lives in sections.api) ----------------------- */

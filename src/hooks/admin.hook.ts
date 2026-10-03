@@ -12,7 +12,11 @@ import {
   getAllPayments,
   getAllSections,
   getCourses,
+  getDashboardSummary,
   getDepartments,
+  getSectionExams,
+  overrideResult,
+  publishExamResults,
   updateCourse,
   updateDepartment,
   updateSection,
@@ -21,6 +25,7 @@ import {
   type GenerateFeesPayload,
   type SemesterDatesPayload,
 } from "@/api";
+import type { OverrideResultPayload } from "@/components/types";
 import type { PaymentsParams } from "@/components/types";
 
 /* Departments ----------------------------------------------- */
@@ -141,6 +146,16 @@ export function useGenerateFees() {
   });
 }
 
+/* Dashboard ---------------------------------------------------- */
+
+export function useDashboardSummary() {
+  return useQuery({
+    queryKey: ["dashboard-summary"],
+    queryFn: getDashboardSummary,
+    staleTime: 60 * 1000,
+  });
+}
+
 /* Payments ----------------------------------------------------- */
 
 export function useAdminPayments(params: PaymentsParams) {
@@ -148,6 +163,36 @@ export function useAdminPayments(params: PaymentsParams) {
     queryKey: ["payments", params],
     queryFn: () => getAllPayments(params),
     placeholderData: (prev) => prev,
+  });
+}
+
+/* Results ------------------------------------------------------ */
+
+export function useSectionExams(sectionId?: string) {
+  return useQuery({
+    queryKey: ["exams", sectionId ?? "none"],
+    queryFn: () => getSectionExams(sectionId as string),
+    enabled: Boolean(sectionId),
+  });
+}
+
+export function usePublishExamResults() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: publishExamResults,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["exams"] });
+    },
+  });
+}
+
+export function useOverrideResult() {
+  return useMutation({
+    mutationFn: ({
+      resultId,
+      ...payload
+    }: { resultId: string } & OverrideResultPayload) =>
+      overrideResult(resultId, payload),
   });
 }
 
