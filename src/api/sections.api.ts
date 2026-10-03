@@ -3,6 +3,7 @@ import apiClient from "@/lib/apiClient";
 
 interface GetAllSectionsParams {
   semesterId?: string;
+  instructorId?: string;
   searchTerm?: string;
   title?: string;
   page?: number;
@@ -16,6 +17,10 @@ export async function getAllSections(
 
   if (params?.semesterId) {
     query.set("semesterId", params.semesterId);
+  }
+
+  if (params?.instructorId) {
+    query.set("instructorId", params.instructorId);
   }
 
   if (params?.searchTerm) {
@@ -38,6 +43,7 @@ export async function getAllSections(
     `/sections${qs ? `?${qs}` : ""}`,
   );
 
+  console.log("getAllSections res", res.data);
   return {
     items: res.data ?? [],
     meta: res.meta

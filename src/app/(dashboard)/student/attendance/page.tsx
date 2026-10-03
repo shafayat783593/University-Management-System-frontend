@@ -1,4 +1,4 @@
-import MyAttendanceList from "@/components/modules/attendance/my-attendance-list";
+import MyAttendanceList from "@/components/modules/student/attendance/my-attendance-list";
 
 export const metadata = {
   title: "My Attendance",

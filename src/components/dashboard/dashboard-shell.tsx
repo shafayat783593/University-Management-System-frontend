@@ -66,9 +66,7 @@ export default function DashboardShell({
 }) {
   const { data: me } = useGetMe();
   const userName =
-    // biome-ignore lint/suspicious/noExplicitAny: API shape varies
     (me as any)?.data?.name ??
-    // biome-ignore lint/suspicious/noExplicitAny: API shape varies
     (me as any)?.name ??
     role.charAt(0) + role.slice(1).toLowerCase();
 

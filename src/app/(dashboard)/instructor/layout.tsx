@@ -9,7 +9,12 @@ export default function InstructorLayout({
 }) {
   return (
     <RoleGuard roles={["INSTRUCTOR"]}>
-      <DashboardShell role="INSTRUCTOR">{children}</DashboardShell>
+      <DashboardShell role="INSTRUCTOR">
+        {children}
+      </DashboardShell>
     </RoleGuard>
   );
 }
+
+
+ 

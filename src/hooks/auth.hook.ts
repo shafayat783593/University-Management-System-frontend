@@ -89,8 +89,14 @@ export function useUpdateProfileImage() {
 
 
 export function useChangePassword() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn:changePassword
+    mutationFn: changePassword,
+    onSuccess: () => {
+      // Refresh `me` so needPasswordChange flips to false
+      // and the AuthGuard stops forcing /profile.
+      void queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
+    },
   });
 }
 

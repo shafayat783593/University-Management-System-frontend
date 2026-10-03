@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-ui";
-import InstructorApprovalManager from "@/components/modules/instructor-approval/instructor-approval-manager";
+import InstructorApprovalManager from "@/components/modules/instructor/instructor-approval/instructor-approval-manager";
 
 export default function InstructorApplicationsPage() {
   return (

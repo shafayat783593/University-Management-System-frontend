@@ -10,6 +10,7 @@ import {
   generateFees,
   getAllInstructorApplications,
   getAllPayments,
+  getAuditLogs,
   getAllSections,
   getCourses,
   getDashboardSummary,
@@ -25,7 +26,7 @@ import {
   type GenerateFeesPayload,
   type SemesterDatesPayload,
 } from "@/api";
-import type { OverrideResultPayload } from "@/components/types";
+import type { AuditLogParams, OverrideResultPayload } from "@/components/types";
 import type { PaymentsParams } from "@/components/types";
 
 /* Departments ----------------------------------------------- */
@@ -153,6 +154,16 @@ export function useDashboardSummary() {
     queryKey: ["dashboard-summary"],
     queryFn: getDashboardSummary,
     staleTime: 60 * 1000,
+  });
+}
+
+/* Audit logs --------------------------------------------------- */
+
+export function useAuditLogs(params: AuditLogParams) {
+  return useQuery({
+    queryKey: ["audit-logs", params],
+    queryFn: () => getAuditLogs(params),
+    placeholderData: (prev) => prev,
   });
 }
 

@@ -1,4 +1,8 @@
-import type { ApiResponse, Enrollment } from "@/components/types";
+import type {
+  ApiResponse,
+  Enrollment,
+  SectionEnrollment,
+} from "@/components/types";
 import apiClient from "@/lib/apiClient";
 
 export async function createEnrollment(payload: { sectionId: string }) {
@@ -11,6 +15,13 @@ export async function createEnrollment(payload: { sectionId: string }) {
 
 export async function getMyEnrollments() {
   const res = await apiClient<ApiResponse<Enrollment[]>>("/enrollments/my");
+  return res.data ?? [];
+}
+
+export async function getSectionEnrollments(sectionId: string) {
+  const res = await apiClient<ApiResponse<SectionEnrollment[]>>(
+    `/enrollments/sections/${sectionId}`,
+  );
   return res.data ?? [];
 }
 

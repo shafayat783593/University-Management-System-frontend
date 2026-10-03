@@ -4,7 +4,7 @@ import { ArrowRight, Building2, Megaphone } from "lucide-react";
 import { getAllDepartment } from "@/api";
 import { getPublishedAnnouncements } from "@/api/announcements.api";
 import type { Announcement } from "@/components/types";
-import Hero from "@/components/modules/home/hero";
+import Hero from "@/components/modules/public/home/hero";
 
 export const revalidate = 60;
 

@@ -57,6 +57,17 @@ export function useSections(params: {
 
 
 
+
+export function useInstructorSections(instructorId?: string) {
+  return useQuery({
+    queryKey: ["sections", "mine", instructorId ?? "none"],
+    queryFn: () => getAllSections({ instructorId, limit: 50 }),
+    enabled: Boolean(instructorId),
+    placeholderData: (prev) => prev,
+    staleTime: 30 * 1000,
+  });
+}
+
 export function useEnroll() {
   const queryClient = useQueryClient();
   return useMutation({

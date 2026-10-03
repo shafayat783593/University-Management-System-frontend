@@ -6,4 +6,6 @@ export * from "./semesters.api";
 export * from "./sections.api";
 export * from "./enrollments.api";
 export * from "./attendance.api";
+export * from "./exams.api";
+export * from "./results.api";
 export * from "./admin.api";

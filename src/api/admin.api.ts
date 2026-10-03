@@ -1,5 +1,7 @@
 import type {
   ApiResponse,
+  AuditLog,
+  AuditLogParams,
   Course,
   DashboardSummary,
   Department,
@@ -195,6 +197,30 @@ export async function getDashboardSummary() {
     "/dashboard/summary",
   );
   return res.data;
+}
+
+/* Audit logs ------------------------------------------------- */
+
+// Backend wraps list payloads inside `data`: { data: { data, meta } }.
+export async function getAuditLogs(params: AuditLogParams = {}) {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+  if (params.actorId) query.set("actorId", params.actorId);
+  if (params.targetType) query.set("targetType", params.targetType);
+  if (params.action) query.set("action", params.action);
+  if (params.from) query.set("from", params.from);
+  if (params.to) query.set("to", params.to);
+
+  const qs = query.toString();
+  const res = await apiClient<ApiResponse<unknown>>(
+    `/audit-logs${qs ? `?${qs}` : ""}`,
+  );
+  const body = res.data as {
+    data?: AuditLog[];
+    meta?: ApiResponse<unknown>["meta"];
+  } | null;
+  return { items: body?.data ?? [], meta: body?.meta };
 }
 
 /* Sections (list lives in sections.api) ----------------------- */

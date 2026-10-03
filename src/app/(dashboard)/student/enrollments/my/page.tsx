@@ -1,4 +1,4 @@
-import MyEnrollmentsList from "@/components/modules/enrollments/my-enrollments-list";
+import MyEnrollmentsList from "@/components/modules/student/enrollments/my-enrollments-list";
 
 export const metadata = {
   title: "My Enrollments",

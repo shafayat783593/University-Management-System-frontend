@@ -1,4 +1,4 @@
-import EnrollmentsBrowser from "@/components/modules/enrollments/enrollments-browser";
+import EnrollmentsBrowser from "@/components/modules/student/enrollments/enrollments-browser";
 
 export const metadata = {
   title: "Browse & Enroll",

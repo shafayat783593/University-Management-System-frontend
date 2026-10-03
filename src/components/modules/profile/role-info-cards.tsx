@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { UserRound } from "lucide-react";
 import { DashboardPanel } from "@/components/dashboard/dashboard-ui";
-import type { StudentProfileInfo } from "@/components/types";
+import { Badge } from "@/components/ui/badge";
+import type { InstructorProfileInfo, StudentProfileInfo } from "@/components/types";
+import { useAuth, useDepartments } from "@/hooks";
 
 // Shows saved student contact info on /profile (read only).
 // Edit lives at /student/profile-info.
@@ -78,40 +80,67 @@ export function StudentInfoEmpty() {
 }
 
 // Instructors have no edit endpoint yet — display only.
+// Shows names (department, user) instead of raw IDs.
 export function InstructorInfoCard({
   profile,
 }: {
-  profile: Record<string, unknown> | null | undefined;
+  profile: InstructorProfileInfo | null | undefined;
 }) {
+  const { data: me } = useAuth();
+  const departments = useDepartments(1).data?.items ?? [];
+
   if (!profile) return null;
 
-  const entries = Object.entries(profile).filter(
-    ([, v]) => typeof v === "string" && v.length > 0,
-  );
+  const department = departments.find((d) => d.id === profile.departmentId);
+  const user = me?.data;
+
+  const rows = [
+    { label: "Name", value: user?.name },
+    { label: "Email", value: user?.email },
+    {
+      label: "Department",
+      value: department
+        ? `${department.name} (${department.code})`
+        : "Loading…",
+    },
+    { label: "Qualification", value: profile.qualification },
+  ].filter((r) => r.value);
 
   return (
     <DashboardPanel
       title="Instructor info"
       subtitle="Your teaching record (read only)."
     >
-      {entries.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No instructor details to show.
-        </p>
-      ) : (
-        <dl className="grid gap-3 sm:grid-cols-2">
-          {entries.slice(0, 6).map(([key, value]) => (
-            <div key={key} className="rounded-xl bg-muted/60 p-3">
-              <dt className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
-                {key}
-              </dt>
-              <dd className="mt-0.5 truncate text-sm font-semibold">
-                {String(value)}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      )}
+      <dl className="grid gap-3 sm:grid-cols-2">
+        {rows.map((r) => (
+          <div key={r.label} className="rounded-xl bg-muted/60 p-3">
+            <dt className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              {r.label}
+            </dt>
+            <dd className="mt-0.5 truncate text-sm font-semibold">{r.value}</dd>
+          </div>
+        ))}
+        {profile.verificationStatus ? (
+          <div className="rounded-xl bg-muted/60 p-3">
+            <dt className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Status
+            </dt>
+            <dd className="mt-1">
+              <Badge
+                variant={
+                  profile.verificationStatus === "APPROVED"
+                    ? "success"
+                    : profile.verificationStatus === "PENDING"
+                      ? "warning"
+                      : "destructive"
+                }
+              >
+                {profile.verificationStatus}
+              </Badge>
+            </dd>
+          </div>
+        ) : null}
+      </dl>
     </DashboardPanel>
   );
 }

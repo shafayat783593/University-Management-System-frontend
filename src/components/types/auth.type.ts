@@ -26,6 +26,15 @@ export interface  ChangePasswordValue  {
 
 export type UserRole = "SUPERADMIN" |"ADMIN"|"INSTRUCTOR"|"STUDENT"
 
+export interface InstructorProfileInfo {
+  id: string;
+  departmentId: string;
+  qualification?: string | null;
+  verificationStatus?: string;
+  // Backend may add more fields — allow reading them.
+  [key: string]: unknown;
+}
+
 export interface MeUser {
   id: string;
   name: string;
@@ -35,7 +44,7 @@ export interface MeUser {
   emailVerified: boolean;
   needPasswordChange?: boolean;
   studentProfile?: StudentProfileInfo | null;
-  instructorProfile?: Record<string, unknown> | null;
+  instructorProfile?: InstructorProfileInfo | null;
 }
 
 export interface ChangePasswordPayload {

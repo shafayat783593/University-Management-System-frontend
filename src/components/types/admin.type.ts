@@ -66,6 +66,27 @@ export interface OverrideResultPayload {
   reason: string;
 }
 
+export interface AuditLog {
+  id: string;
+  actorId: string;
+  action: string;
+  targetType: string;
+  targetId: string;
+  reason?: string | null;
+  createdAt: string;
+  actor?: { id: string; name: string; email: string; role: string } | null;
+}
+
+export interface AuditLogParams {
+  page?: number;
+  limit?: number;
+  actorId?: string;
+  targetType?: string;
+  action?: string;
+  from?: string;
+  to?: string;
+}
+
 export interface DashboardSummary {
   totals: {
     departments: number;

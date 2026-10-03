@@ -78,9 +78,15 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
         </Badge>
       </div>
 
-      {isActive ? (
-        <div className="mt-auto flex gap-2 pt-1">
-          {isOpen ? (
+      <div className="mt-auto flex gap-2 pt-1">
+        <Link
+          href={`/student/results/sections/${section.id}`}
+          className="inline-flex h-9 items-center rounded-2xl border px-3 text-sm font-medium hover:bg-muted"
+        >
+          Result
+        </Link>
+        {isActive ? (
+          isOpen ? (
             <Button
               type="button"
               variant="outline"
@@ -98,9 +104,9 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
             >
               {withdraw.isPending ? "Withdrawing…" : "Withdraw"}
             </Button>
-          )}
-        </div>
-      ) : null}
+          )
+        ) : null}
+      </div>
     </li>
   );
 }
