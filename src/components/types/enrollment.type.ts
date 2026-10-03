@@ -8,6 +8,9 @@ export interface Semester {
   status: SemesterStatus;
   enrollmentStart?: string | null;
   enrollmentEnd?: string | null;
+  examWeekStart?: string | null;
+  examWeekEnd?: string | null;
+  resultPublishDate?: string | null;
   _count?: {
     sections?: number;
     fees?: number;

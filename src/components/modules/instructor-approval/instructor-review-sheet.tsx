@@ -27,25 +27,24 @@ export default function InstructorReviewSheet({
   onClose: () => void;
 }) {
   const [rejectionReason, setRejectionReason] = useState("");
-  const [mode, setMode] = useState<"APPROVED" | "REJECTED" | null>(null);
-  const reviewMutation = useReviewInstructorApplication();
+  const review = useReviewInstructorApplication();
 
   const open = application !== null;
 
-  const close = () => {
+  function close() {
     setRejectionReason("");
-    setMode(null);
-    reviewMutation.reset();
+    review.reset();
     onClose();
-  };
+  }
 
-  const submit = (status: "APPROVED" | "REJECTED") => {
+  // Approve needs no reason. Reject needs a reason (backend also requires it).
+  function submit(status: "APPROVED" | "REJECTED") {
     if (!application) return;
     if (status === "REJECTED" && rejectionReason.trim().length < 5) {
-      toast.error("Rejection reason required", { description: "Please write at least 5 characters." });
+      toast.error("Please write a rejection reason (at least 5 characters).");
       return;
     }
-    reviewMutation.mutate(
+    review.mutate(
       {
         instructorId: application.id,
         payload: {
@@ -56,19 +55,19 @@ export default function InstructorReviewSheet({
       },
       {
         onSuccess: () => {
-          toast.success(status === "APPROVED"
-                ? "Instructor approved"
-                : "Application rejected", { description: status === "APPROVED"
-                ? "Login credentials were emailed to the instructor."
-                : "The applicant has been notified by email." });
+          toast.success(
+            status === "APPROVED"
+              ? "Instructor approved. Login credentials were emailed."
+              : "Application rejected. The applicant has been notified.",
+          );
           close();
         },
-        onError: (err) => {
-          toast.error("Review failed", { description: err instanceof Error ? err.message : "Please try again." });
+        onError: () => {
+          toast.error("Review failed. Please try again.");
         },
-      }
+      },
     );
-  };
+  }
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && close()}>
@@ -168,54 +167,44 @@ export default function InstructorReviewSheet({
               {application.verificationStatus === "PENDING" ? (
                 <>
                   <Separator />
+
+                  <div className="flex flex-col gap-1">
+                    <label
+                      htmlFor="rejectionReason"
+                      className="text-[13px] font-semibold"
+                    >
+                      Rejection reason{" "}
+                      <span className="font-normal text-muted-foreground">
+                        (only needed to reject)
+                      </span>
+                    </label>
+                    <Input
+                      id="rejectionReason"
+                      placeholder="e.g. Resume does not meet requirements…"
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                    />
+                  </div>
+
                   <div className="flex gap-2">
                     <Button
-                      variant={mode === "REJECTED" ? "outline" : "default"}
                       className="flex-1"
-                      disabled={reviewMutation.isPending}
-                      onClick={() => {
-                        setMode("APPROVED");
-                        submit("APPROVED");
-                      }}
+                      disabled={review.isPending}
+                      onClick={() => submit("APPROVED")}
                     >
-                      {reviewMutation.isPending ? <Spinner /> : <Check />}
+                      {review.isPending ? <Spinner /> : <Check />}
                       Approve
                     </Button>
                     <Button
                       variant="destructive"
                       className="flex-1"
-                      disabled={reviewMutation.isPending}
-                      onClick={() => setMode(mode === "REJECTED" ? null : "REJECTED")}
+                      disabled={review.isPending}
+                      onClick={() => submit("REJECTED")}
                     >
-                      <X />
+                      {review.isPending ? <Spinner /> : <X />}
                       Reject
                     </Button>
                   </div>
-
-                  {mode === "REJECTED" ? (
-                    <div className="flex flex-col gap-2">
-                      <label
-                        htmlFor="rejectionReason"
-                        className="text-[13px] font-semibold"
-                      >
-                        Rejection reason
-                      </label>
-                      <Input
-                        id="rejectionReason"
-                        placeholder="e.g. Resume does not meet requirements…"
-                        value={rejectionReason}
-                        onChange={(e) => setRejectionReason(e.target.value)}
-                      />
-                      <Button
-                        variant="destructive"
-                        disabled={reviewMutation.isPending}
-                        onClick={() => submit("REJECTED")}
-                      >
-                        {reviewMutation.isPending ? <Spinner /> : <X />}
-                        Confirm rejection
-                      </Button>
-                    </div>
-                  ) : null}
                 </>
               ) : (
                 <p className="rounded-xl bg-muted px-3 py-2 text-[13px] text-muted-foreground">

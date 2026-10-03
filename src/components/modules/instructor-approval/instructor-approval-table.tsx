@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, Check, Eye, FileText, MailCheck, X } from "lucide-react";
+import { BadgeCheck, Eye, FileText, MailCheck } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import TablePagination from "@/components/ui/table.pagination";
 import type { InstructorApplication } from "@/components/types";
-import { cn } from "@/lib/utils";
 
 function statusVariant(status: InstructorApplication["verificationStatus"]) {
   if (status === "APPROVED") return "success" as const;
@@ -38,14 +37,12 @@ export default function InstructorApprovalTable({
   totalPages,
   onPageChange,
   onReview,
-  reviewingId,
 }: {
   applications: InstructorApplication[];
   page: number;
   totalPages: number;
   onPageChange: (page: number) => void;
   onReview: (application: InstructorApplication) => void;
-  reviewingId?: string | null;
 }) {
   if (applications.length === 0) {
     return (
@@ -140,25 +137,6 @@ export default function InstructorApprovalTable({
                       <FileText />
                       Resume
                     </a>
-                  ) : null}
-                  {app.verificationStatus === "PENDING" ? (
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1 text-xs text-muted-foreground",
-                        reviewingId === app.id && "opacity-60"
-                      )}
-                    >
-                      {reviewingId === app.id ? (
-                        <>
-                          <Check className="size-3 animate-pulse" />
-                          Working…
-                        </>
-                      ) : (
-                        <>
-                          <X className="hidden" />
-                        </>
-                      )}
-                    </span>
                   ) : null}
                 </div>
               </TableCell>

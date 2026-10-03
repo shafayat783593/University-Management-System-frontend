@@ -20,9 +20,7 @@ export function useGetAllDepartment() {
     queryKey: ["departments"],
     queryFn: getAllDepartment,
     select: (res) => {
-      // apiClient("/departments") returns { success, data: Department[], meta }
-      // Unwrap to return Department[] for the component.
-      // Handle both wrapped and unwrapped shapes defensively.
+ 
       const unwrapped = (res as ApiWrappedResponse<Department[]>)?.data ?? res;
       return Array.isArray(unwrapped) ? (unwrapped as Department[]) : [];
     },

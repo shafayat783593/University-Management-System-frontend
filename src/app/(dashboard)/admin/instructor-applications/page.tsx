@@ -3,11 +3,11 @@ import { ArrowLeft } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-ui";
 import InstructorApprovalManager from "@/components/modules/instructor-approval/instructor-approval-manager";
 
-export default function ApprovedInstructorPage() {
+export default function InstructorApplicationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <DashboardPageHeader
-        title="Approved instructors"
+        title="Instructor applications"
         subtitle="Review pending applications, approve instructors or reject with a reason."
         action={
           <Link

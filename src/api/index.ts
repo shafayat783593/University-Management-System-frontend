@@ -5,3 +5,5 @@ export * from "./announcements.api";
 export * from "./semesters.api";
 export * from "./sections.api";
 export * from "./enrollments.api";
+export * from "./attendance.api";
+export * from "./admin.api";

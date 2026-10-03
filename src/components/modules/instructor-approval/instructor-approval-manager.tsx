@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useRef, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Search } from "lucide-react";
 import { DashboardPanel } from "@/components/dashboard/dashboard-ui";
 import { Input } from "@/components/ui/input";
@@ -23,17 +23,17 @@ export default function InstructorApprovalManager() {
   const debouncedSearch = useDebounce(searchInput, 500);
 
 
-  const param : GetInstructorApplicationsParams={
+  // "ALL" tab means no status filter (backend returns everything).
+  const params: GetInstructorApplicationsParams = {
     page,
     limit: PAGE_SIZE,
-    verificationStatus: tab,
+    verificationStatus: tab === "ALL" ? undefined : tab,
     searchTerm: debouncedSearch || undefined,
     sortBy: "createdAt",
     sortOrder: "desc",
-  }
-  const { data, isLoading, isError, refetch } = useGetInstructorApplications(param);
-
-
+  };
+  const { data, isLoading, isError, refetch } =
+    useGetInstructorApplications(params);
 
   const applications: InstructorApplication[] = data?.data ?? [];
   const meta = data?.meta;
