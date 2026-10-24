@@ -15,7 +15,7 @@ import InstructorApprovalTabs, { ApprovalTab } from "./instructor-approval-tabs"
 const PAGE_SIZE = 10;
 
 export default function InstructorApprovalManager() {
-  const [tab, setTab] = useState<ApprovalTab>("PENDING");
+  const [tab, setTab] = useState<ApprovalTab>("ALL");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<InstructorApplication | null>(null);
   const [searchInput, setSearchInput] = useState("");
