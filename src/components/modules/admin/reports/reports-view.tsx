@@ -129,9 +129,11 @@ function CollectionPanel() {
 function OutstandingPanel() {
   const [page, setPage] = useState(1);
   const query = useOutstandingReport({ page, limit: 10 });
-  const rows = query.data?.data ?? [];
+  const rows = Array.isArray(query.data?.data) ? query.data?.data : [];
+  console.log("OutstandingPanel rows:", rows);
   const meta = query.data?.meta;
 
+  
   return (
     <DashboardPanel
       title="Outstanding dues"
@@ -179,7 +181,7 @@ function OutstandingPanel() {
 
 function OverduePanel() {
   const query = useOverdueReport();
-  const rows = query.data ?? [];
+  const rows = Array.isArray(query.data) ? query.data : [];
 
   return (
     <DashboardPanel title="Overdue installments" subtitle="Unpaid and past due, oldest first.">
