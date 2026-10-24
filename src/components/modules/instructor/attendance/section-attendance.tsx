@@ -45,6 +45,7 @@ function formatDay(value: string) {
 export default function SectionAttendance({ sectionId }: { sectionId: string }) {
   const [date, setDate] = useState(todayInput);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [freshSession, setFreshSession] = useState<{ id: string; date: string } | null>(null);
   const [marks, setMarks] = useState<Record<string, AttendanceStatus>>({});
 
   const roster = useSectionEnrollments(sectionId);
@@ -54,7 +55,12 @@ export default function SectionAttendance({ sectionId }: { sectionId: string }) 
 
   const students = roster.data ?? [];
   const sessions = history.data ?? [];
-  const activeSession = sessions.find((s) => s.id === activeSessionId) ?? null;
+  // A just-created session isn't in the cached list yet — fall back to it.
+  const activeSession =
+    sessions.find((s) => s.id === activeSessionId) ??
+    (freshSession && freshSession.id === activeSessionId
+      ? { id: freshSession.id, date: freshSession.date, records: [] as { studentId: string; status: AttendanceStatus }[] }
+      : null);
 
   // Open a session for marking: prefill from its saved records, rest PRESENT.
   function openSession(sessionId: string) {
@@ -75,7 +81,12 @@ export default function SectionAttendance({ sectionId }: { sectionId: string }) 
     createSession.mutate(new Date(date).toISOString(), {
       onSuccess: (session) => {
         toast.success("Session created. Now mark attendance below.");
-        openSession(session.id);
+        // Open immediately — don't wait for the history refetch.
+        const filled: Record<string, AttendanceStatus> = {};
+        for (const s of students) filled[s.studentId] = "PRESENT";
+        setMarks(filled);
+        setFreshSession({ id: session.id, date: session.date });
+        setActiveSessionId(session.id);
       },
       onError: (err) =>
         toast.error(getApiErrorMessage(err, "Could not create session.")),

@@ -9,13 +9,13 @@ import { useAuth, useDepartments } from "@/hooks";
 
 // Shows saved student contact info on /profile (read only).
 // Edit lives at /student/profile-info.
+// Task 9: studentIdCode is null until admission is paid → show Pending chip.
 export function StudentInfoCard({
   profile,
 }: {
   profile: StudentProfileInfo;
 }) {
   const rows = [
-    { label: "Student ID", value: profile.studentIdCode },
     { label: "Phone", value: profile.phone },
     { label: "Address", value: profile.address },
     { label: "Guardian", value: profile.guardianName },
@@ -34,6 +34,16 @@ export function StudentInfoCard({
         </Link>
       }
     >
+      <div className="mb-3 flex items-center gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+          Student ID
+        </span>
+        {profile.studentIdCode ? (
+          <Badge variant="success">{profile.studentIdCode}</Badge>
+        ) : (
+          <Badge variant="warning">Pending admission confirmation</Badge>
+        )}
+      </div>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nothing saved yet.</p>
       ) : (

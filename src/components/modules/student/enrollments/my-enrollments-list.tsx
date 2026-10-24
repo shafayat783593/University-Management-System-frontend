@@ -9,47 +9,14 @@ import type { Enrollment } from "@/components/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  useDropEnrollment,
-  useMyEnrollments,
-  useWithdrawEnrollment,
-} from "@/hooks";
+import { useMyEnrollments } from "@/hooks";
 import { getApiErrorMessage } from "@/hooks/auth.hook";
 
 // One card for one enrollment. Keeps the list easy to read.
 function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
-  const drop = useDropEnrollment();
-  const withdraw = useWithdrawEnrollment();
-
   const section = enrollment.section;
   const isOpen = section.semester.status === "OPEN";
   const isActive = enrollment.status === "ENROLLED";
-
-  const busy = drop.isPending || withdraw.isPending;
-
-  function handleDrop() {
-    const ok = window.confirm(`Drop ${section.course.code}? Your seat will be freed.`,);
-    if (!ok) return;
-
-    drop.mutate(section.id, {
-      onSuccess: () => toast.success(`Dropped ${section.course.code}`),
-      onError: (err) =>
-        toast.error(getApiErrorMessage(err, "Could not drop this section")),
-    });
-  }
-
-  function handleWithdraw() {
-    const ok = window.confirm(
-      `Withdraw from ${section.course.code}? This is harder to undo.`,
-    );
-    if (!ok) return;
-
-    withdraw.mutate(section.id, {
-      onSuccess: () => toast.success(`Withdrew from ${section.course.code}`),
-      onError: (err) =>
-        toast.error(getApiErrorMessage(err, "Could not withdraw")),
-    });
-  }
 
   return (
     <li className="flex flex-col gap-3 rounded-2xl border bg-card p-5 shadow-soft">
@@ -86,25 +53,9 @@ function EnrollmentCard({ enrollment }: { enrollment: Enrollment }) {
           Result
         </Link>
         {isActive ? (
-          isOpen ? (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy}
-              onClick={handleDrop}
-            >
-              {drop.isPending ? "Dropping…" : "Drop"}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              disabled={busy}
-              onClick={handleWithdraw}
-            >
-              {withdraw.isPending ? "Withdrawing…" : "Withdraw"}
-            </Button>
-          )
+          <Button type="button" disabled>
+            Withdrawn
+          </Button>
         ) : null}
       </div>
     </li>
@@ -134,6 +85,12 @@ export default function MyEnrollmentsList() {
           </Link>
         }
       />
+
+      {active.length > 0 ? (
+        <p className="rounded-2xl border border-warning/30 bg-warning/10 px-4 py-3 text-[13px] font-medium">
+          Dropping a course after your invoice is issued does not reduce it automatically — contact the office.
+        </p>
+      ) : null}
 
       {query.isLoading ? (
         <ul className="grid gap-3 md:grid-cols-2">

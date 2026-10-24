@@ -1,4 +1,3 @@
-
 export type InstructorVerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface InstructorApplicationUser {
@@ -54,15 +53,13 @@ export interface ReviewInstructorPayload {
   rejectionReason?: string;
 }
 
-
 export type ApplyAsInstructorPayload = {
   name: string;
   email: string;
   departmentId: string;
   qualification: string;
-  resume: File
+  resume: File;
 };
-
 
 export interface InstructorParams {
   page?: number;
@@ -70,6 +67,5 @@ export interface InstructorParams {
   searchTerm?: string;
   verificationStatus?: InstructorVerificationStatus | "ALL";
   sortOrder?: "desc" | "asc";
-   sortBy: "createdAt",
+  sortBy: "createdAt";
 }
-  

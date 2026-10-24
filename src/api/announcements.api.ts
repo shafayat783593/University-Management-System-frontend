@@ -1,13 +1,11 @@
-import apiClient from "@/lib/apiClient";
 import type {
   Announcement,
   ApiResponse,
   Meta,
   SemesterCalendar,
 } from "@/components/types";
+import apiClient from "@/lib/apiClient";
 
-// Backend list endpoints wrap the payload inside `data`:
-// { success, statusCode, message, data: { data: Announcement[], meta: Meta } }
 function normalizeList(res: ApiResponse<unknown>) {
   const body = res.data as
     | Announcement[]

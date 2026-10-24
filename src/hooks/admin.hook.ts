@@ -7,7 +7,6 @@ import {
   deleteCourse,
   deleteDepartment,
   deleteSection,
-  generateFees,
   getAllInstructorApplications,
   getAllPayments,
   getAuditLogs,
@@ -23,10 +22,9 @@ import {
   updateSection,
   updateSemesterDates,
   updateSemesterStatus,
-  type GenerateFeesPayload,
   type SemesterDatesPayload,
 } from "@/api";
-import type { AuditLogParams, OverrideResultPayload } from "@/components/types";
+import type { AuditLogParams, DepartmentPayload, OverrideResultPayload } from "@/components/types";
 import type { PaymentsParams } from "@/components/types";
 
 /* Departments ----------------------------------------------- */
@@ -62,9 +60,7 @@ export function useUpdateDepartment() {
       ...payload
     }: {
       id: string;
-      name: string;
-      code: string;
-    }) => updateDepartment(id, payload),
+    } & Partial<DepartmentPayload>) => updateDepartment(id, payload),
     onSuccess: invalidate,
   });
 }
@@ -133,16 +129,6 @@ export function useUpdateSemesterDates() {
   return useMutation({
     mutationFn: ({ id, ...dates }: { id: string } & SemesterDatesPayload) =>
       updateSemesterDates(id, dates),
-    onSuccess: invalidate,
-  });
-}
-
-/* Fees -------------------------------------------------------- */
-
-export function useGenerateFees() {
-  const invalidate = useInvalidate("payments");
-  return useMutation({
-    mutationFn: (payload: GenerateFeesPayload) => generateFees(payload),
     onSuccess: invalidate,
   });
 }

@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useSectionResultSheet } from "@/hooks";
+import { DuesBlockedNotice, isDuesBlocked } from "./dues-blocked-notice";
 import { SectionResultActions } from "./result-actions";
 
 function statusVariant(status: string) {
@@ -34,6 +35,11 @@ export default function SectionResultView({ sectionId }: { sectionId: string }) 
         <Skeleton className="h-64 w-full" />
       </div>
     );
+  }
+
+  // §10: overdue installments block viewing (403) — paying stays open.
+  if (query.isError && isDuesBlocked(query.error)) {
+    return <DuesBlockedNotice error={query.error} />;
   }
 
   if (query.isError || !query.data) {

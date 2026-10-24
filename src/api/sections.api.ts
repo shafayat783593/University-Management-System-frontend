@@ -10,9 +10,7 @@ interface GetAllSectionsParams {
   limit?: number;
 }
 
-export async function getAllSections(
-  params?: GetAllSectionsParams,
-) {
+export async function getAllSections(params?: GetAllSectionsParams) {
   const query = new URLSearchParams();
 
   if (params?.semesterId) {
@@ -43,16 +41,8 @@ export async function getAllSections(
     `/sections${qs ? `?${qs}` : ""}`,
   );
 
-  console.log("getAllSections res", res.data);
   return {
     items: res.data ?? [],
-    meta: res.meta
+    meta: res.meta,
   };
 }
-
-
-
-
-
-
-

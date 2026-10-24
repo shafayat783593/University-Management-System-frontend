@@ -9,7 +9,6 @@ import {
 } from "@/api";
 
 
-
 export function useSemesters( page = 1, status?: string,) {
   return useQuery({
     queryKey: ["semesters", page, status ?? "all"],
@@ -104,6 +103,7 @@ export function useWithdrawEnrollment() {
     mutationFn: withdrawEnrollment,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["my-enrollments"] });
+      void queryClient.invalidateQueries({ queryKey: ["sections"] });
     },
   });
 }

@@ -8,10 +8,19 @@ import {
   type AnnouncementPayload,
 } from "@/api";
 
-export function usePublishedAnnouncements(page: number, limit = 10) {
+export function usePublishedAnnouncements(
+  page: number,
+  limit = 10,
+  initialItems?: import("@/components/types").Announcement[],
+) {
   return useQuery({
     queryKey: ["announcements", "published", page, limit],
     queryFn: () => getPublishedAnnouncements({ page, limit }),
+    initialData:
+      initialItems !== undefined
+        ? { items: initialItems, meta: undefined as never }
+        : undefined,
+    staleTime: 60_000,
     placeholderData: (prev) => prev,
   });
 }

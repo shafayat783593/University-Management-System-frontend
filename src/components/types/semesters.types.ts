@@ -1,6 +1,4 @@
-
-
- export interface semesterParams {
+export interface semesterParams {
   status?: string;
   page?: number;
   limit?: number;

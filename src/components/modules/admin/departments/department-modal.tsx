@@ -29,6 +29,11 @@ export default function DepartmentModal({
 }: DepartmentModalProps) {
   const [name, setName] = useState(editing?.name ?? "");
   const [code, setCode] = useState(editing?.code ?? "");
+  // [UPDATED Task 21] — shown on the public /departments/[id] page (Task 6A).
+  const [description, setDescription] = useState(editing?.description ?? "");
+  const [fee, setFee] = useState(
+    editing?.tuitionFeePerSemester != null ? String(editing.tuitionFeePerSemester) : "",
+  );
 
   const create = useCreateDepartment();
   const update = useUpdateDepartment();
@@ -39,7 +44,18 @@ export default function DepartmentModal({
       toast.error("Name and code need at least 2 characters.");
       return;
     }
-    const payload = { name: name.trim(), code: code.trim() };
+    const trimmedFee = fee.trim();
+    const parsedFee = trimmedFee === "" ? undefined : Number(trimmedFee);
+    if (parsedFee !== undefined && (!Number.isFinite(parsedFee) || parsedFee < 0)) {
+      toast.error("Tuition fee must be a positive number (or left empty).");
+      return;
+    }
+    const payload = {
+      name: name.trim(),
+      code: code.trim(),
+      ...(description.trim() ? { description: description.trim() } : {}),
+      ...(parsedFee !== undefined ? { tuitionFeePerSemester: parsedFee } : {}),
+    };
 
     if (editing) {
       update.mutate(
@@ -78,7 +94,8 @@ export default function DepartmentModal({
             {editing ? "Edit department" : "New department"}
           </DialogTitle>
           <DialogDescription>
-            A short code like “CSE” works best.
+            A short code like “CSE” works best. Description and tuition fee appear
+            on the public program page.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3">
@@ -98,6 +115,28 @@ export default function DepartmentModal({
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="CSE"
+            />
+          </div>
+          <div className="flex flex-col gap-1 text-sm font-medium">
+            <label htmlFor="dept-description">Description (optional)</label>
+            <textarea
+              id="dept-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What this program covers, careers, highlights…"
+              rows={3}
+              className="rounded-xl border border-input bg-card px-3 py-2 text-sm font-normal outline-none placeholder:text-muted-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div className="flex flex-col gap-1 text-sm font-medium">
+            <label htmlFor="dept-fee">Tuition fee per semester (optional, ৳)</label>
+            <Input
+              id="dept-fee"
+              type="number"
+              min={0}
+              value={fee}
+              onChange={(e) => setFee(e.target.value)}
+              placeholder="55000"
             />
           </div>
           <Button onClick={save} disabled={busy}>

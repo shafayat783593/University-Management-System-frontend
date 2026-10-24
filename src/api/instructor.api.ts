@@ -1,34 +1,37 @@
-import {
+import type {
   ApiResponse,
-  VerifyAccountPayload,
- GetInstructorApplicationsParams,
-   InstructorApplication,
+  ApplyAsInstructorPayload,
+  GetInstructorApplicationsParams,
+  InstructorApplication,
   ReviewInstructorPayload,
-  ApplyAsInstructorPayload
+  VerifyAccountPayload,
 } from "@/components/types";
 import apiClient from "@/lib/apiClient";
 
-
-export function applyAsInstructor({ resume, ...data }: ApplyAsInstructorPayload) {
+export function applyAsInstructor({
+  resume,
+  ...data
+}: ApplyAsInstructorPayload) {
   const body = new FormData();
   body.append("name", data.name.trim());
   body.append("email", data.email.trim().toLowerCase());
   body.append("departmentId", data.departmentId);
-  if (data.qualification.trim()) body.append("qualification", data.qualification.trim());
+  if (data.qualification.trim())
+    body.append("qualification", data.qualification.trim());
   body.append("resume", resume);
   return apiClient("/instructors/apply", { method: "POST", body });
 }
 
-
-
 export const verifyInstructorEmailVerify = (payload: VerifyAccountPayload) => {
-  return apiClient("instructors/verify-email", { method: "POST", body: payload })
+  return apiClient("/instructors/verify-email", {
+    method: "POST",
+    body: payload,
+  });
+};
 
-}
-
-
-
-export function getAllInstructorApplications(params: GetInstructorApplicationsParams = {}) {
+export function getAllInstructorApplications(
+  params: GetInstructorApplicationsParams = {},
+) {
   const query = new URLSearchParams();
   if (params.page) query.set("page", String(params.page));
   if (params.limit) query.set("limit", String(params.limit));
@@ -47,7 +50,10 @@ export function getAllInstructorApplications(params: GetInstructorApplicationsPa
   );
 }
 
-export function reviewInstructorApplication(instructorId: string, payload: ReviewInstructorPayload) {
+export function reviewInstructorApplication(
+  instructorId: string,
+  payload: ReviewInstructorPayload,
+) {
   return apiClient(`/instructors/${instructorId}/review`, {
     method: "PATCH",
     body: payload,

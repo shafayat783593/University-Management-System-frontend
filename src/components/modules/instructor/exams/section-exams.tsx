@@ -18,18 +18,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useSectionExams } from "@/hooks";
-import { useSectionEnrollments } from "@/hooks";
-import { useCreateExam, useSubmitExamResults } from "@/hooks";
+import {
+  useCreateExam,
+  useSectionEnrollments,
+  useSectionExams,
+  useSubmitExamResults,
+} from "@/hooks";
 import { getApiErrorMessage } from "@/hooks/auth.hook";
 
 const inputClass = "h-9 w-full rounded-xl border bg-background px-3 text-sm";
 
 // Create a new exam for this section.
+// `examDate` is optional — but offered via a date-time picker, not omitted.
+// Creating an exam emails every enrolled student automatically.
 function CreateExamCard({ sectionId }: { sectionId: string }) {
   const [title, setTitle] = useState("");
   const [examType, setExamType] = useState("MIDTERM");
   const [totalMarks, setTotalMarks] = useState("");
+  const [examDate, setExamDate] = useState("");
 
   const create = useCreateExam(sectionId);
 
@@ -44,12 +50,19 @@ function CreateExamCard({ sectionId }: { sectionId: string }) {
       return;
     }
     create.mutate(
-      { title: title.trim(), examType, totalMarks: total },
+      {
+        title: title.trim(),
+        examType,
+        totalMarks: total,
+        // Empty = no date (backend treats it as optional).
+        examDate: examDate ? new Date(examDate).toISOString() : undefined,
+      },
       {
         onSuccess: () => {
-          toast.success("Exam created. Now enter results below.");
+          toast.success("Exam created. Students were emailed automatically.");
           setTitle("");
           setTotalMarks("");
+          setExamDate("");
         },
         onError: (err) =>
           toast.error(getApiErrorMessage(err, "Could not create exam.")),
@@ -59,7 +72,7 @@ function CreateExamCard({ sectionId }: { sectionId: string }) {
 
   return (
     <DashboardPanel title="New exam">
-      <div className="flex max-w-2xl flex-col gap-3 sm:flex-row sm:items-end">
+      <div className="flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-end sm:flex-wrap">
         <div className="flex flex-1 flex-col gap-1 text-sm font-medium">
           <label htmlFor="exam-title">Title</label>
           <Input
@@ -92,6 +105,21 @@ function CreateExamCard({ sectionId }: { sectionId: string }) {
             value={totalMarks}
             onChange={(e) => setTotalMarks(e.target.value)}
             className="sm:w-32"
+          />
+        </div>
+        <div className="flex flex-col gap-1 text-sm font-medium">
+          <label htmlFor="exam-date">
+            Date & time{" "}
+            <span className="font-normal text-muted-foreground">
+              (optional)
+            </span>
+          </label>
+          <Input
+            id="exam-date"
+            type="datetime-local"
+            value={examDate}
+            onChange={(e) => setExamDate(e.target.value)}
+            className="sm:w-52"
           />
         </div>
         <Button onClick={handleCreate} disabled={create.isPending}>
@@ -233,10 +261,7 @@ export default function SectionExams({ sectionId }: { sectionId: string }) {
 
       <CreateExamCard sectionId={sectionId} />
 
-      <DashboardPanel
-        title="Exams"
-        subtitle="Pick an exam to enter results."
-      >
+      <DashboardPanel title="Exams" subtitle="Pick an exam to enter results.">
         {examsQuery.isLoading ? (
           <div className="flex flex-col gap-2">
             {[0, 1].map((i) => (
@@ -273,6 +298,20 @@ export default function SectionExams({ sectionId }: { sectionId: string }) {
                   <span className="ml-2 font-normal text-muted-foreground">
                     /{exam.totalMarks}
                   </span>
+                  {exam.examDate ? (
+                    <span className="ml-2 font-normal text-muted-foreground">
+                      ·{" "}
+                      {Number.isNaN(new Date(exam.examDate).getTime())
+                        ? exam.examDate
+                        : new Date(exam.examDate).toLocaleString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                    </span>
+                  ) : null}
                 </span>
                 <Button
                   variant={exam.id === activeExamId ? "default" : "outline"}

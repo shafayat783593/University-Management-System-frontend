@@ -17,7 +17,9 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/app/validation";
-import { useLogin } from "@/hooks";
+import { useLogin, ME_QUERY_KEY } from "@/hooks";
+import { getMe } from "@/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
@@ -29,6 +31,7 @@ type LoginFormData = {
 
 export function LoginForm({ className, ...props }: ComponentProps<"form">) {
   const { mutateAsync: login, isPending: loginPending } = useLogin();
+  const queryClient = useQueryClient();
 
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
@@ -50,9 +53,27 @@ export function LoginForm({ className, ...props }: ComponentProps<"form">) {
           password: value.password,
         });
 
+        // Cookie just got set — refresh "me" so Header sees you at once.
+        await queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
+        let home = "/";
+        try {
+          const me = await getMe();
+          const role = me.data?.role;
+          home =
+            role === "STUDENT"
+              ? "/student"
+              : role === "INSTRUCTOR"
+                ? "/instructor"
+                : role === "ADMIN" || role === "SUPERADMIN"
+                  ? "/admin/dashboard"
+                  : "/";
+        } catch {
+          home = "/";
+        }
+
         toast.success("Login successful", { description: "You have been logged in successfully." });
 
-        router.push("/");
+        router.push(home);
       } catch (error) {
         toast.error("Login failed", { description: "Invalid email or password." });
       }

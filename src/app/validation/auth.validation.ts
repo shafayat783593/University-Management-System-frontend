@@ -31,24 +31,34 @@ export const StudentRegisterSchema = z.object({
     .min(1, "Password is required")
     .min(6, "Password must be at least 6 characters"),
 
-  departmentId: z
-    .string()
-    .min(1, "Please select a department"),
-
-  studentIdCode: z
-    .string()
-    .min(1, "Student ID is required"),
+  // §3: department required at register; studentIdCode must NOT be sent.
+  departmentId: z.string().min(1, "Please select a department"),
 
   phone: z
     .string()
     .optional()
     .refine(
       (val) => !val || /^01[3-9]\d{8}$/.test(val),
-      "Invalid Bangladeshi phone number (e.g., 017XXXXXXXX)"
+      "Invalid Bangladeshi phone number (e.g., 017XXXXXXXX)",
     ),
 });
 
 export type StudentRegisterFormValues = z.infer<typeof StudentRegisterSchema>;
+
+// §3 — POST /auth/complete-profile (Google sign-ups: department + phone only).
+// Academic background is submitted via /admission-applications instead.
+export const completeProfileSchema = z.object({
+  departmentId: z.string().min(1, "Please select a department"),
+  phone: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^01[3-9]\d{8}$/.test(val),
+      "Invalid Bangladeshi phone number (e.g., 017XXXXXXXX)",
+    ),
+});
+
+export type CompleteProfileFormValues = z.infer<typeof completeProfileSchema>;
 
 export const changePasswordSchema = z
   .object({

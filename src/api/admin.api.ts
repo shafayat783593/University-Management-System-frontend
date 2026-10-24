@@ -5,6 +5,7 @@ import type {
   Course,
   DashboardSummary,
   Department,
+  DepartmentPayload,
   Exam,
   OverrideResultPayload,
   Payment,
@@ -21,10 +22,7 @@ export async function getDepartments(page = 1) {
   return { items: res.data ?? [], meta: res.meta };
 }
 
-export async function createDepartment(payload: {
-  name: string;
-  code: string;
-}) {
+export async function createDepartment(payload: DepartmentPayload) {
   const res = await apiClient<ApiResponse<Department>>("/departments", {
     method: "POST",
     body: payload,
@@ -34,7 +32,7 @@ export async function createDepartment(payload: {
 
 export async function updateDepartment(
   id: string,
-  payload: { name: string; code: string },
+  payload: Partial<DepartmentPayload>,
 ) {
   const res = await apiClient<ApiResponse<Department>>(`/departments/${id}`, {
     method: "PATCH",
@@ -115,32 +113,14 @@ export interface SemesterDatesPayload {
   resultPublishDate?: string;
 }
 
-export async function updateSemesterDates(id: string, payload: SemesterDatesPayload) {
+export async function updateSemesterDates(
+  id: string,
+  payload: SemesterDatesPayload,
+) {
   const res = await apiClient(`/semesters/${id}/dates`, {
     method: "PATCH",
     body: payload,
   });
-  return res.data;
-}
-
-/* Fees ------------------------------------------------------- */
-
-export interface GenerateFeesPayload {
-  semesterId: string;
-  amount: number;
-  dueDate?: string;
-}
-
-export interface GenerateFeesResult {
-  generatedCount: number;
-  totalActiveStudents: number;
-}
-
-export async function generateFees(payload: GenerateFeesPayload) {
-  const res = await apiClient<ApiResponse<GenerateFeesResult>>(
-    "/fees/generate",
-    { method: "POST", body: payload },
-  );
   return res.data;
 }
 
@@ -157,10 +137,11 @@ export async function getAllPayments(params: PaymentsParams = {}) {
   if (params.searchTerm) query.set("searchTerm", params.searchTerm);
 
   const qs = query.toString();
-  const res = await apiClient<ApiResponse<Payment[]>>(
-    `/payments${qs ? `?${qs}` : ""}`,
-  );
-  return { items: res.data ?? [], meta: res.meta };
+  // Backend wraps once more: ApiResponse.data = { data: Payment[], meta }.
+  const res = await apiClient<
+    ApiResponse<{ data: Payment[]; meta?: ApiResponse<unknown>["meta"] }>
+  >(`/payments${qs ? `?${qs}` : ""}`);
+  return { items: res.data?.data ?? [], meta: res.data?.meta ?? res.meta };
 }
 
 /* Results ---------------------------------------------------- */
@@ -193,15 +174,13 @@ export async function overrideResult(
 /* Dashboard -------------------------------------------------- */
 
 export async function getDashboardSummary() {
-  const res = await apiClient<ApiResponse<DashboardSummary>>(
-    "/dashboard/summary",
-  );
+  const res =
+    await apiClient<ApiResponse<DashboardSummary>>("/dashboard/summary");
   return res.data;
 }
 
 /* Audit logs ------------------------------------------------- */
 
-// Backend wraps list payloads inside `data`: { data: { data, meta } }.
 export async function getAuditLogs(params: AuditLogParams = {}) {
   const query = new URLSearchParams();
   if (params.page) query.set("page", String(params.page));

@@ -18,10 +18,13 @@ export function useVerifyInstructorEmailVerify () {
   return useMutation({ mutationFn: verifyInstructorEmailVerify});
 }
 
-export function useGetInstructorApplications(params: GetInstructorApplicationsParams) {
+export function useGetInstructorApplications(
+  params: GetInstructorApplicationsParams,
+) {
   return useQuery({
     queryKey: ["instructor-applications", params],
     queryFn: () => getAllInstructorApplications(params),
+    staleTime: 60_000,
     placeholderData: (prev) => prev,
   });
 }

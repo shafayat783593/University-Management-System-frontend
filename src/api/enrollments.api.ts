@@ -26,17 +26,9 @@ export async function getSectionEnrollments(sectionId: string) {
 }
 
 export async function dropEnrollment(sectionId: string) {
-  const res = await apiClient<ApiResponse<Enrollment>>(
-    `/enrollments/${sectionId}`,
-    { method: "DELETE" },
-  );
-  return res.data;
+  await apiClient(`/enrollments/${sectionId}`, { method: "DELETE" });
 }
 
 export async function withdrawEnrollment(sectionId: string) {
-  const res = await apiClient<ApiResponse<Enrollment>>(
-    `/enrollments/${sectionId}/withdraw`,
-    { method: "PATCH" },
-  );
-  return res.data;
+  await apiClient(`/enrollments/${sectionId}/withdraw`, { method: "PATCH" });
 }

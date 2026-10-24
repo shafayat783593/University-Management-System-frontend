@@ -2,6 +2,15 @@ export interface Department {
   id: string;
   name: string;
   code: string;
+  description?: string | null;
+  tuitionFeePerSemester?: number | null;
+}
+
+export interface DepartmentPayload {
+  name: string;
+  code: string;
+  description?: string;
+  tuitionFeePerSemester?: number;
 }
 
 export interface CoursePrerequisite {
@@ -27,22 +36,33 @@ export type PaymentStatus =
   | "CANCELLED"
   | "REFUNDED";
 
-export interface Payment {
+/* GET /payments — one row per installment payment attempt.
+   Student/semester live under installment.fee (see TASKS.md Task 33). */
+export interface AdminPayment {
   id: string;
-  feeId: string;
+  installmentId: string;
   amount: number;
   status: PaymentStatus;
   trxId?: string | null;
   paidAt?: string | null;
   createdAt: string;
-  fee?: {
-    student?: {
-      studentIdCode?: string | null;
-      user?: { name: string; email: string } | null;
+  installment?: {
+    id: string;
+    number: number;
+    fee?: {
+      invoiceNo?: string | null;
+      type?: string | null;
+      student?: {
+        studentIdCode?: string | null;
+        user?: { name: string; email: string } | null;
+      } | null;
+      semester?: { id: string; name: string } | null;
     } | null;
-    semester?: { name: string } | null;
   } | null;
 }
+
+/** @deprecated use AdminPayment (installment-nested shape) instead. */
+export type Payment = AdminPayment;
 
 export interface PaymentsParams {
   page?: number;
@@ -53,12 +73,63 @@ export interface PaymentsParams {
   searchTerm?: string;
 }
 
+// Task 21 [installments] — GET /payments/my-fees.
+// One fee has 1+ installments ordered by number. Fee status is derived:
+// PENDING / PARTIALLY_PAID / PAID. ADMISSION = 1 non-refundable installment.
+export type FeeType = "ADMISSION" | "TUITION";
+export type FeeStatus = "PENDING" | "PARTIALLY_PAID" | "PAID";
+
+export interface InstallmentPayment {
+  id: string;
+  status: PaymentStatus;
+  trxId?: string | null;
+  paidAt?: string | null;
+}
+
+export interface InvoiceItem {
+  id: string;
+  label: string;
+  kind: string;
+  amount: number;
+}
+
+export interface StudentInstallment {
+  id: string;
+  number: number;
+  amount: number;
+  dueDate: string;
+  status: FeeStatus | "FAILED";
+  isOverdue: boolean;
+  payment?: InstallmentPayment | null;
+}
+
+export interface StudentFee {
+  id: string;
+  type: FeeType;
+  amount: number;
+  paidAmount: number;
+  subtotal?: number;
+  discountAmount?: number;
+  adjustmentAmount?: number;
+  invoiceNo?: string | null;
+  status: FeeStatus;
+  semester?: { id: string; name: string; enrollmentEnd?: string | null } | null;
+  installments: StudentInstallment[];
+  items?: InvoiceItem[];
+}
+
+export interface BkashInitResult {
+  bkashURL: string;
+  paymentID: string;
+}
+
 export interface Exam {
   id: string;
   sectionId: string;
   title: string;
   examType: string;
   totalMarks: number;
+  examDate?: string | null;
 }
 
 export interface OverrideResultPayload {

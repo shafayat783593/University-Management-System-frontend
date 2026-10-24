@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import AuthLoading from "@/components/auth/auth.loading";
 import EnrollmentsBrowser from "@/components/modules/student/enrollments/enrollments-browser";
 
 export const metadata = {
@@ -6,5 +8,9 @@ export const metadata = {
 };
 
 export default function StudentEnrollPage() {
-  return <EnrollmentsBrowser />;
+  return (
+    <Suspense fallback={<AuthLoading label="Loading…" />}>
+      <EnrollmentsBrowser />
+    </Suspense>
+  );
 }

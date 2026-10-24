@@ -1,7 +1,3 @@
-
-
-
-
 export interface ApiResponse<T> {
   success: boolean;
   statusCode: number;
@@ -10,10 +6,11 @@ export interface ApiResponse<T> {
   meta?: Meta;
 }
 
-
 export interface Meta {
   page: number;
   limit: number;
   total: number;
   totalPages: number;
+  // Extra totals some reports attach (e.g. outstanding dues).
+  totalOutstanding?: number;
 }

@@ -298,6 +298,32 @@
     );
 }
 
+/* ---------- Sonner: errors must be unmissable ----------
+   Sonner renders [data-type] on [data-sonner-toast] and [data-title] /
+   [data-description] inside it. Styling the error type here makes EVERY
+   toast.error() bold across the whole app, instead of patching the ~30
+   individual toast.error() call sites one by one. Sonner's own defaults
+   are 500 for the title and 400 for the description, which is why errors
+   read as grey body text and get missed. */
+
+[data-sonner-toast][data-type="error"] [data-title] {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+[data-sonner-toast][data-type="error"] [data-description] {
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Slightly heavier border so the error toast separates from the page. */
+[data-sonner-toast][data-type="error"][data-styled="true"] {
+  border-width: 2px;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 12%);
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

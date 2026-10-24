@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useTranscript } from "@/hooks";
+import { DuesBlockedNotice, isDuesBlocked } from "./dues-blocked-notice";
 import { TranscriptActions } from "./result-actions";
 
 // Task 14: JSON transcript view + PDF download + email copy.
@@ -30,6 +31,11 @@ export default function TranscriptView() {
         <Skeleton className="h-64 w-full" />
       </div>
     );
+  }
+
+  // §10: overdue installments block viewing (403) — paying stays open.
+  if (query.isError && isDuesBlocked(query.error)) {
+    return <DuesBlockedNotice error={query.error} />;
   }
 
   if (query.isError || !query.data) {

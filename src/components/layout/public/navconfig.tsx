@@ -1,8 +1,7 @@
-
-
-import type { LucideIcon } from "lucide-react"
+import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
+  Briefcase,
   Building2,
   CalendarDays,
   ClipboardList,
@@ -10,34 +9,34 @@ import {
   FileBarChart,
   GraduationCap,
   LayoutDashboard,
-  Library,
-  Settings,
+  Megaphone,
   UserCog,
   Users,
-} from "lucide-react"
+} from "lucide-react";
 
-export type Role = "admin" | "instructor" | "student"
+export type Role = "admin" | "instructor" | "student";
 
 export type NavItem = {
-  label: string
-  href: string
-  icon: LucideIcon
-}
+  label: string;
+  href: string;
+  icon: LucideIcon;
+};
 
-/** Shown when nobody is logged in. */
+/** Shown when nobody is logged in — only links to pages that exist. */
 export const publicNav: NavItem[] = [
-  { label: "Programs", href: "/programs", icon: GraduationCap },
-  { label: "Admissions", href: "/admissions", icon: ClipboardList },
-  { label: "Departments", href: "/departments", icon: Building2 },
-  { label: "Library", href: "/library", icon: Library },
-]
+  { label: "Home", href: "/", icon: GraduationCap },
+  { label: "Programs", href: "/#programs", icon: Building2 },
+  { label: "Announcements", href: "/announcements", icon: Megaphone },
+  { label: "Apply as Student", href: "/register", icon: ClipboardList },
+  { label: "Join as Instructor", href: "/instructors/apply", icon: Briefcase },
+];
 
 /** Where each role lands right after login. */
 export const dashboardHome: Record<Role, string> = {
   admin: "/admin",
   instructor: "/instructor",
   student: "/student",
-}
+};
 
 /** Top-level links per role. Keep this to 5–6 items; the rest lives in the sidebar. */
 export const roleNav: Record<Role, NavItem[]> = {
@@ -47,7 +46,11 @@ export const roleNav: Record<Role, NavItem[]> = {
     { label: "Courses", href: "/admin/courses", icon: BookOpen },
     { label: "Semesters", href: "/admin/semesters", icon: CalendarDays },
     { label: "Sections", href: "/admin/sections", icon: Users },
-    { label: "Applications", href: "/admin/instructor-applications", icon: UserCog },
+    {
+      label: "Applications",
+      href: "/admin/instructor-applications",
+      icon: UserCog,
+    },
   ],
   instructor: [
     { label: "Dashboard", href: "/instructor", icon: LayoutDashboard },
@@ -56,28 +59,35 @@ export const roleNav: Record<Role, NavItem[]> = {
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
     { label: "Enrollments", href: "/student/enrollments", icon: BookOpen },
-    { label: "My Enrollments", href: "/student/enrollments/my", icon: ClipboardList },
-    { label: "Transcript", href: "/student/results/transcript", icon: FileBarChart },
+    {
+      label: "My Enrollments",
+      href: "/student/enrollments/my",
+      icon: ClipboardList,
+    },
+    {
+      label: "Transcript",
+      href: "/student/results/transcript",
+      icon: FileBarChart,
+    },
     { label: "My Fees", href: "/student/payments/my-fees", icon: CreditCard },
   ],
-}
+};
 
 export function isRole(value: unknown): value is Role {
-  return value === "admin" || value === "instructor" || value === "student"
+  return value === "admin" || value === "instructor" || value === "student";
 }
 
 export function getNavForRole(role?: string | null): NavItem[] {
-  return isRole(role) ? roleNav[role] : publicNav
+  return isRole(role) ? roleNav[role] : publicNav;
 }
 
 export function getDashboardHome(role?: string | null): string {
-  return isRole(role) ? dashboardHome[role] : "/login"
+  return isRole(role) ? dashboardHome[role] : "/login";
 }
 
 export function roleLabel(role?: string | null): string {
- 
-  if (role === "admin") return "Administrator"
-  if (role === "instructor") return "Instructor"
-  if (role === "student") return "Student"
-  return "Guest"
+  if (role === "admin") return "Administrator";
+  if (role === "instructor") return "Instructor";
+  if (role === "student") return "Student";
+  return "Guest";
 }

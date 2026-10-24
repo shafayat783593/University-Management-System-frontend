@@ -1,9 +1,6 @@
 import type { ApiResponse, Semester } from "@/components/types";
-import { semesterParams } from "@/components/types/semesters.types";
+import type { semesterParams } from "@/components/types/semesters.types";
 import apiClient from "@/lib/apiClient";
-
-
-
 
 export async function getAllSemesters(params?: semesterParams) {
   const query = new URLSearchParams();
@@ -17,8 +14,9 @@ export async function getAllSemesters(params?: semesterParams) {
   if (params?.sortBy) query.set("sortBy", params.sortBy);
   if (params?.sortOrder) query.set("sortOrder", params.sortOrder);
 
-  const res = await apiClient<ApiResponse<Semester[]>>(`/semesters?${query.toString()}`,);
+  const res = await apiClient<ApiResponse<Semester[]>>(
+    `/semesters?${query.toString()}`,
+  );
 
-  return {items: res.data ?? [], meta: res.meta,
-  };
+  return { items: res.data ?? [], meta: res.meta };
 }

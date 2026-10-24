@@ -1,12 +1,15 @@
 "use client";
 
 import { toast } from "sonner";
-import { useGoogleOAuth } from "@/hooks";
+import { useGoogleOAuth, ME_QUERY_KEY } from "@/hooks";
+import { getMe } from "@/api";
+import { useQueryClient } from "@tanstack/react-query";
 import { GoogleLogin } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
 
 export default function GoogleLoginComponent() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { mutate: googleLogin } = useGoogleOAuth();
 
   const handleGoogleSuccess = (credentialResponse: { credential?: string }) => {
@@ -20,9 +23,25 @@ export default function GoogleLoginComponent() {
     googleLogin(
       { idToken },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          await queryClient.invalidateQueries({ queryKey: ME_QUERY_KEY });
+          let home = "/";
+          try {
+            const me = await getMe();
+            const role = me.data?.role;
+            home =
+              role === "STUDENT"
+                ? "/student"
+                : role === "INSTRUCTOR"
+                  ? "/instructor"
+                  : role === "ADMIN" || role === "SUPERADMIN"
+                    ? "/admin/dashboard"
+                    : "/";
+          } catch {
+            home = "/";
+          }
           toast.success("Logged in Successfully", { description: "Welcome back" });
-          router.push("/");
+          router.push(home);
         },
         onError: (err) => {
           toast.error("Google OAuth Failed", { description: err.message || "Something went wrong. Please try again" });

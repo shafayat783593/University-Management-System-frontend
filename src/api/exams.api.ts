@@ -6,6 +6,7 @@ export interface CreateExamPayload {
   title: string;
   examType: string;
   totalMarks: number;
+  examDate?: string;
 }
 
 export async function createExam(payload: CreateExamPayload) {
@@ -14,6 +15,16 @@ export async function createExam(payload: CreateExamPayload) {
     body: payload,
   });
   return res.data;
+}
+
+// Bulk create across the instructor's own sections.
+// Backend rejects the WHOLE batch (403) if any section isn't theirs.
+export async function createBulkExams(exams: CreateExamPayload[]) {
+  const res = await apiClient<ApiResponse<Exam[]>>("/exams/bulk", {
+    method: "POST",
+    body: { exams },
+  });
+  return res.data ?? [];
 }
 
 export async function submitExamResults(

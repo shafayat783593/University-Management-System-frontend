@@ -1,96 +1,268 @@
+"use client";
+
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, CreditCard, GraduationCap, Trophy } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   DashboardPageHeader,
   DashboardPanel,
-  StatCards,
 } from "@/components/dashboard/dashboard-ui";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  useInitPayment,
+  useMyAdmissionApplication,
+  useMyInvoiceSummary,
+} from "@/hooks";
+import { getApiErrorMessage } from "@/hooks/auth.hook";
+import { formatBDT, formatDueDate } from "@/lib/format";
 
-const stats = [
-  { label: "Enrolled Courses", value: "6", hint: "Spring semester", icon: BookOpen, tone: "violet" as const },
-  { label: "CGPA", value: "3.78", hint: "Last updated Fall 2025", icon: Trophy, trend: "+0.12", tone: "amber" as const },
-  { label: "Credits Completed", value: "98", hint: "Out of 130 required", icon: GraduationCap, tone: "green" as const },
-  { label: "Due Payments", value: "$450", hint: "Pay before Mar 30", icon: CreditCard, tone: "blue" as const },
-];
-
-const courses = [
-  { code: "CSE 401", title: "Machine Learning", progress: 72, instructor: "Dr. Tanvir Ahmed" },
-  { code: "CSE 402", title: "Distributed Systems", progress: 54, instructor: "Prof. Nusrat Jahan" },
-  { code: "MAT 301", title: "Linear Algebra II", progress: 88, instructor: "Dr. Kamal Hossain" },
-];
-
+// Task 11 — landing page after login: admission + dues summary.
+// Data: GET /admission-applications/me + GET /invoices/my/summary.
 export default function StudentOverview() {
+  const router = useRouter();
+  const admissionQuery = useMyAdmissionApplication();
+  const summaryQuery = useMyInvoiceSummary();
+  const pay = useInitPayment();
+
+  const loading = admissionQuery.isLoading || summaryQuery.isLoading;
+  const failed = admissionQuery.isError || summaryQuery.isError;
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Skeleton className="h-10 w-72" />
+        <Skeleton className="h-28 w-full" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (failed) {
+    const msg = getApiErrorMessage(
+      admissionQuery.error ?? summaryQuery.error,
+      "Could not load your dashboard.",
+    );
+    return (
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed px-6 py-14 text-center">
+        <p className="text-sm font-semibold">Could not load dashboard</p>
+        <p className="text-[13px] text-muted-foreground">{msg}</p>
+        <button
+          type="button"
+          onClick={() => {
+            void admissionQuery.refetch();
+            void summaryQuery.refetch();
+          }}
+          className="mt-1 h-8 rounded-xl border px-3 text-sm font-medium hover:bg-muted"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  const mine = admissionQuery.data ?? null;
+  const app = mine?.application ?? null;
+  const summary = summaryQuery.data;
+  const next = summary?.nextInstallment ?? null;
+  const overdue = summary?.overdueInstallments ?? [];
+
+  // Primary call-to-action changes with state.
+  const cta = !app
+    ? { href: "/student/admission-application", label: "Apply now" }
+    : !mine?.admissionConfirmed
+      ? { href: "/student/payments/my-fees", label: "Pay admission fee" }
+      : (summary?.outstandingBalance ?? 0) > 0
+        ? { href: "/student/payments/my-fees", label: "Pay installment" }
+        : { href: "/student/enrollments", label: "Enroll in courses" };
+
+  function handlePayNext() {
+    if (!next) return;
+    pay.mutate(
+      { invoiceId: next.invoiceId },
+      {
+        onSuccess: (data) => {
+          if (!data?.bkashURL) {
+            toast.error("The payment gateway did not return a bKash URL.");
+            return;
+          }
+          // The dashboard lives at /student — there is no /student/dashboard.
+          sessionStorage.setItem("payReturnTo", "/student");
+          window.location.href = data.bkashURL;
+        },
+        onError: (err) =>
+          toast.error(getApiErrorMessage(err, "Could not start payment.")),
+      },
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <DashboardPageHeader
-        title="My learning dashboard"
-        subtitle="Track your courses, results and upcoming deadlines."
+        title="Student dashboard"
+        subtitle="Admission status and dues at a glance."
         action={
           <Link
-            href="/student/enrollments"
+            href={cta.href}
             className="gradient-brand inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white shadow-pop transition-opacity hover:opacity-90"
           >
-            Enroll in course
+            {cta.label}
             <ArrowRight className="size-4" />
           </Link>
         }
       />
 
-      <StatCards stats={stats} />
-
-      <div className="grid gap-4 lg:grid-cols-5">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <DashboardPanel
-          title="Continue learning"
-          subtitle="Pick up where you left off"
-          className="lg:col-span-3"
+          title="Admission"
+          subtitle="Live from your admission file"
           action={
-            <Link href="/student/enrollments/my" className="text-[13px] font-semibold text-primary hover:underline">
-              All courses
-            </Link>
+            app ? (
+              <Badge
+                variant={
+                  app.status === "APPROVED"
+                    ? "success"
+                    : app.status === "REJECTED"
+                      ? "destructive"
+                      : "warning"
+                }
+              >
+                {app.status}
+              </Badge>
+            ) : null
           }
         >
-          <div className="flex flex-col gap-3">
-            {courses.map((c) => (
-              <div key={c.code} className="rounded-xl border p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-bold tracking-wide text-primary">{c.code}</p>
-                    <p className="truncate text-sm font-semibold">{c.title}</p>
-                    <p className="truncate text-xs text-muted-foreground">{c.instructor}</p>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold">
-                    {c.progress}%
-                  </span>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="gradient-brand h-full rounded-full"
-                    style={{ width: `${c.progress}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          {!app ? (
+            <p className="text-sm text-muted-foreground">
+              Not applied yet.{" "}
+              <Link
+                href="/student/admission-application"
+                className="font-semibold text-primary hover:underline"
+              >
+                Start application →
+              </Link>
+            </p>
+          ) : (
+            <div className="flex flex-col gap-2 text-sm">
+              {mine?.studentIdCode ? (
+                <p>
+                  Student ID: <strong>{mine.studentIdCode}</strong>
+                </p>
+              ) : (
+                <p>
+                  <Badge variant="warning">
+                    Pending admission confirmation
+                  </Badge>
+                </p>
+              )}
+              {app.status === "REJECTED" ? (
+                <p className="text-[13px]">
+                  Reason: {app.rejectionReason ?? "Contact the office."}
+                </p>
+              ) : null}
+              {mine?.admissionConfirmed ? (
+                <p className="font-semibold text-success">
+                  Admission confirmed — you can enroll now.
+                </p>
+              ) : app.status === "APPROVED" ? (
+                <p>
+                  Approved — pay the admission fee.{" "}
+                  <Link
+                    href="/student/payments/my-fees"
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Go to my fees
+                  </Link>
+                </p>
+              ) : (
+                <p className="text-muted-foreground">
+                  Submitted — waiting for review.
+                </p>
+              )}
+            </div>
+          )}
         </DashboardPanel>
 
-        <DashboardPanel title="Upcoming" subtitle="Deadlines this week" className="lg:col-span-2">
-          <ul className="flex flex-col gap-3 text-sm">
-            {[
-              { t: "ML Assignment 4", d: "Due tomorrow · CSE 401" },
-              { t: "Midterm — Linear Algebra", d: "Thu, 10:00 AM · MAT 301" },
-              { t: "Tuition fee installment", d: "Due Mar 30 · $450" },
-            ].map((x) => (
-              <li key={x.t} className="flex gap-3 rounded-xl bg-muted/60 p-3">
-                <span className="mt-1.5 size-2 shrink-0 rounded-full bg-primary" />
+        <DashboardPanel
+          title="Dues summary"
+          subtitle="Server totals — never computed here"
+        >
+          <dl className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-xl bg-muted/60 p-3">
+              <dt className="text-[11px] text-muted-foreground">Total fees</dt>
+              <dd className="mt-0.5 font-bold tabular-nums">
+                {formatBDT(summary?.totalFees ?? 0)}
+              </dd>
+            </div>
+            <div className="rounded-xl bg-muted/60 p-3">
+              <dt className="text-[11px] text-muted-foreground">Paid</dt>
+              <dd className="mt-0.5 font-bold tabular-nums text-success">
+                {formatBDT(summary?.totalPaid ?? 0)}
+              </dd>
+            </div>
+            <div className="rounded-xl bg-destructive/[0.07] p-3">
+              <dt className="text-[11px] text-muted-foreground">Outstanding</dt>
+              <dd className="mt-0.5 font-bold tabular-nums text-destructive">
+                {formatBDT(summary?.outstandingBalance ?? 0)}
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-3">
+            {next ? (
+              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 text-sm">
                 <span>
-                  <span className="block font-semibold">{x.t}</span>
-                  <span className="block text-xs text-muted-foreground">{x.d}</span>
+                  Next: <strong>{formatBDT(next.remaining)}</strong> by{" "}
+                  <strong>{formatDueDate(next.dueDate)}</strong>
                 </span>
+                <Button
+                  size="sm"
+                  disabled={pay.isPending}
+                  onClick={handlePayNext}
+                >
+                  {pay.isPending ? "Starting…" : "Pay"}
+                </Button>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No pending installment.
+              </p>
+            )}
+          </div>
+        </DashboardPanel>
+      </div>
+
+      {overdue.length > 0 ? (
+        <DashboardPanel
+          title="Overdue"
+          subtitle="Pay these first — viewing results is blocked until clear"
+        >
+          <ul className="flex flex-col gap-2">
+            {overdue.map((o) => (
+              <li
+                key={o.installmentId}
+                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm"
+              >
+                <span className="font-semibold text-destructive">
+                  Installment {o.number} · {formatBDT(o.remaining)} · due{" "}
+                  {formatDueDate(o.dueDate)}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => router.push("/student/payments/my-fees")}
+                >
+                  Pay now
+                </Button>
               </li>
             ))}
           </ul>
         </DashboardPanel>
-      </div>
+      ) : null}
     </div>
   );
 }

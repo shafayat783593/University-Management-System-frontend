@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Receipt, Search } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   DashboardPageHeader,
   DashboardPanel,
@@ -20,6 +21,8 @@ import {
 } from "@/components/ui/table";
 import TablePagination from "@/components/ui/table.pagination";
 import { useAdminPayments } from "@/hooks";
+import { useRefundPayment } from "@/hooks/payments.hook";
+import { getApiErrorMessage } from "@/hooks/auth.hook";
 import { useSemesters } from "@/hooks/enrollments.hook";
 import useDebounce from "@/hooks/searchDebounce.hook";
 
@@ -44,8 +47,95 @@ function formatDay(value?: string | null) {
   });
 }
 
-export default function PaymentsManager() {
-  const [page, setPage] = useState(1);
+// §7 refund — PAID rows only. Amount blank = everything refundable.
+// reverseCharge reopens the dues (student owes again); unticked just
+// sends money back without reopening.
+function RefundCell({ paymentId, status, amount }: { paymentId: string; status: PaymentStatus; amount: number }) {
+  const [open, setOpen] = useState(false);
+  const [refundAmount, setRefundAmount] = useState("");
+  const [reason, setReason] = useState("");
+  const [reverseCharge, setReverseCharge] = useState(true);
+  const refund = useRefundPayment();
+
+  if (status !== "PAID") return <span>—</span>;
+
+  function handleRefund() {
+    const parsed = refundAmount.trim() === "" ? undefined : Number(refundAmount);
+    if (parsed !== undefined && (!Number.isFinite(parsed) || parsed <= 0)) {
+      return toast.error("Enter a positive amount, or leave blank for everything.");
+    }
+    if (reason.trim().length < 5) {
+      return toast.error("Reason needs at least 5 characters.");
+    }
+    refund.mutate(
+      { id: paymentId, payload: { amount: parsed, reason: reason.trim(), reverseCharge } },
+      {
+        onSuccess: (r) => {
+          toast.success(r.reopenedDues ? "Refunded — dues reopened." : "Refunded.");
+          setOpen(false);
+          setRefundAmount("");
+          setReason("");
+        },
+        onError: (err) => toast.error(getApiErrorMessage(err, "Refund failed.")),
+      },
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="h-8 rounded-xl border px-3 text-[13px] font-medium hover:bg-muted"
+      >
+        Refund
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex min-w-52 flex-col gap-1.5">
+      <Input
+        type="number"
+        min={0}
+        step="0.01"
+        value={refundAmount}
+        onChange={(e) => setRefundAmount(e.target.value)}
+        placeholder={`Amount (blank = ৳${amount.toLocaleString()})`}
+        className="h-8 text-[13px]"
+      />
+      <Input
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        placeholder="Reason (min 5 chars)"
+        className="h-8 text-[13px]"
+      />
+      <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <input type="checkbox" checked={reverseCharge} onChange={(e) => setReverseCharge(e.target.checked)} />
+        Reopen dues
+      </label>
+      <div className="flex gap-1.5">
+        <button
+          type="button"
+          disabled={refund.isPending}
+          onClick={handleRefund}
+          className="h-8 rounded-xl bg-destructive px-3 text-[13px] font-medium text-white disabled:opacity-50"
+        >
+          {refund.isPending ? "…" : "Confirm"}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="h-8 rounded-xl border px-3 text-[13px] font-medium hover:bg-muted"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function PaymentsManager() {  const [page, setPage] = useState(1);
   const [status, setStatus] = useState<PaymentStatus | "ALL">("ALL");
   const [semesterId, setSemesterId] = useState("ALL");
   const [studentId, setStudentId] = useState("");
@@ -86,7 +176,7 @@ export default function PaymentsManager() {
       <DashboardPanel title="All payments">
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchInput}
               onChange={(e) => {
@@ -150,6 +240,9 @@ export default function PaymentsManager() {
         ) : list.isError ? (
           <div className="py-10 text-center text-sm">
             <p className="font-semibold">Could not load payments.</p>
+            <p className="mt-1 text-[13px] text-muted-foreground">
+              {getApiErrorMessage(list.error, "Try again in a moment.")}
+            </p>
             <button
               type="button"
               onClick={() => list.refetch()}
@@ -175,42 +268,60 @@ export default function PaymentsManager() {
                 <TableRow>
                   <TableHead>Student</TableHead>
                   <TableHead>Semester</TableHead>
+                  <TableHead>Installment</TableHead>
                   <TableHead>Amount</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Trx ID</TableHead>
                   <TableHead>Paid at</TableHead>
+                  <TableHead>Refund</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell>
-                      <span className="block text-sm font-semibold">
-                        {row.fee?.student?.user?.name ?? "—"}
-                      </span>
-                      <span className="block text-xs text-muted-foreground">
-                        {row.fee?.student?.user?.email ?? ""}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-[13px]">
-                      {row.fee?.semester?.name ?? "—"}
-                    </TableCell>
-                    <TableCell className="font-semibold">
-                      {row.amount}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariant(row.status)}>
-                        {row.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-[13px] text-muted-foreground">
-                      {row.trxId ?? "—"}
-                    </TableCell>
-                    <TableCell className="text-[13px] text-muted-foreground">
-                      {formatDay(row.paidAt)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {rows.map((row) => {
+                  const fee = row.installment?.fee;
+                  return (
+                    <TableRow key={row.id}>
+                      <TableCell>
+                        <span className="block text-sm font-semibold">
+                          {fee?.student?.user?.name ?? "—"}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {[
+                            fee?.student?.user?.email,
+                            fee?.student?.studentIdCode,
+                          ]
+                            .filter(Boolean)
+                            .join(" • ")}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-[13px]">
+                        {fee?.semester?.name ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-[13px]">
+                        {row.installment?.number != null
+                          ? `Installment ${row.installment.number}`
+                          : "—"}
+                      </TableCell>
+                      <TableCell className="font-semibold tabular-nums">
+                        ৳{row.amount.toLocaleString("en-IN")}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant(row.status)}>
+                          {row.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-[13px] text-muted-foreground">
+                        {row.trxId ?? "—"}
+                      </TableCell>
+                      <TableCell className="text-[13px] text-muted-foreground">
+                        {formatDay(row.paidAt)}
+                      </TableCell>
+                      <TableCell>
+                        <RefundCell paymentId={row.id} status={row.status} amount={row.amount} />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
 
