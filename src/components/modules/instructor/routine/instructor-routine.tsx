@@ -205,7 +205,6 @@ function AddEntryForm() {
   );
 }
 
-// Task 27 — own teaching schedule as a weekly timetable + add/remove
 // entries (conflict-checked: 409 = overlapping class).
 export default function InstructorRoutine() {
   const query = useMyInstructorRoutine();

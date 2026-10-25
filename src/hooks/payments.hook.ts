@@ -95,7 +95,6 @@ export function useDownloadTransactionReceipt() {
   });
 }
 
-// Task 21C — re-check INITIATED/PENDING payments (POST /payments/:id/verify).
 export function useVerifyPayment() {
   const queryClient = useQueryClient();
   return useMutation({

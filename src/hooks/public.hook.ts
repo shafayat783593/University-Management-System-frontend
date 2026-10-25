@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPublicDepartments, getPublicFaculty, getPublicStats } from "@/api";
 
-// Task 6B — easy public hooks for the landing page (no auth needed).
 
 export function usePublicStats(initial?: { students?: number; instructors?: number; departments?: number; courses?: number }) {
   return useQuery({

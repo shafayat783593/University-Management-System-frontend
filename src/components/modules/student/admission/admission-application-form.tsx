@@ -78,7 +78,6 @@ function toPayload(
   };
 }
 
-// Task 13 — 2 steps: pay application fee → fill form. Then review states.
 export default function AdmissionApplicationForm() {
   const router = useRouter();
   const existingQuery = useMyAdmissionApplication();
@@ -137,7 +136,6 @@ export default function AdmissionApplicationForm() {
     }
   }
 
-  // Task 13.4 — pay the ADMISSION invoice from here, without a detour to
   // "my fees" (which lists invoices the student may not recognise).
   async function handlePayAdmissionFee() {
     const invoice = mine?.admissionInvoice;

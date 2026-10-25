@@ -1,7 +1,6 @@
 import type { ApiResponse } from "@/components/types/api";
 import apiClient from "@/lib/apiClient";
 
-// Task 13 — /admission-applications (Phase B).
 // Status word is SUBMITTED (not PENDING). Rejection text is rejectionReason.
 // testScore / testDate / applicationFeeTrxId no longer exist.
 

@@ -29,7 +29,6 @@ export default function DepartmentModal({
 }: DepartmentModalProps) {
   const [name, setName] = useState(editing?.name ?? "");
   const [code, setCode] = useState(editing?.code ?? "");
-  // [UPDATED Task 21] — shown on the public /departments/[id] page (Task 6A).
   const [description, setDescription] = useState(editing?.description ?? "");
   const [fee, setFee] = useState(
     editing?.tuitionFeePerSemester != null ? String(editing.tuitionFeePerSemester) : "",

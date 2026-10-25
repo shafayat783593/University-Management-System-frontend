@@ -24,7 +24,6 @@ function statusVariant(status: string) {
   return "secondary" as const;
 }
 
-// Task 14: one section's result sheet + PDF download + email copy.
 export default function SectionResultView({ sectionId }: { sectionId: string }) {
   const query = useSectionResultSheet(sectionId);
 

@@ -30,7 +30,6 @@ export function useGetAllDepartment(initialData?: Department[]) {
   });
 }
 
-// Task 6A — public, no auth required.
 export function useDepartmentDetails(id: string | undefined) {
   return useQuery({
     queryKey: ["departments", id, "details"],

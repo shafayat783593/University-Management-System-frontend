@@ -16,10 +16,8 @@ import apiClient from "@/lib/apiClient";
 /* Departments ----------------------------------------------- */
 
 export async function getDepartments(page = 1) {
-  const res = await apiClient<ApiResponse<Department[]>>(
-    `/departments?page=${page}&limit=10`,
-  );
-  return { items: res.data ?? [], meta: res.meta };
+  const res = await apiClient<ApiResponse<Department[]>>( `/departments?page=${page}&limit=10`);
+  return { items: res.data ?? [], meta: res.meta }
 }
 
 export async function createDepartment(payload: DepartmentPayload) {

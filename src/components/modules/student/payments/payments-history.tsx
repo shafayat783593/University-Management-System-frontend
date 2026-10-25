@@ -31,7 +31,6 @@ function statusVariant(status: string) {
   return "destructive" as const;
 }
 
-// Task 21C — receipt for SUCCESS/REFUNDED, Re-check for INITIATED/PENDING.
 function ReceiptButton({ tx }: { tx: PaymentTransaction }) {
   const download = useDownloadTransactionReceipt();
   const verify = useVerifyPayment();

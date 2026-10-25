@@ -79,7 +79,6 @@ function StatCard({
   );
 }
 
-// Task 6B — counts come from GET /public/stats (SSR hydrates first paint).
 export default function StatsCounter({ initialCounts }: StatsCounterProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const inView = useInView(containerRef, { once: true, margin: "-60px" });

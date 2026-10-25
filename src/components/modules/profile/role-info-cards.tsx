@@ -9,7 +9,6 @@ import { useAuth, useDepartments } from "@/hooks";
 
 // Shows saved student contact info on /profile (read only).
 // Edit lives at /student/profile-info.
-// Task 9: studentIdCode is null until admission is paid → show Pending chip.
 export function StudentInfoCard({
   profile,
 }: {

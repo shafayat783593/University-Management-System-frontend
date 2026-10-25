@@ -1,7 +1,6 @@
 import type { ApiResponse } from "@/components/types/api";
 import apiClient from "@/lib/apiClient";
 
-// §8 / Task 41 — /fee-policies. One row per (itemType, scope), NOT per semester:
 // billing reads these to build invoice line items. Rates are snapshotted onto
 // each invoice, so editing a policy never rewrites an issued invoice.
 

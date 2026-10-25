@@ -31,7 +31,6 @@ function statusVariant(status: string) {
   return "secondary" as const;
 }
 
-// Task 21 — one card per invoice: server totals + installment schedule + pay.
 // Never compute money here — only render payable / paid / outstanding.
 function InvoiceCard({ invoice }: { invoice: Invoice }) {
   const pay = useInitPayment();
@@ -345,7 +344,6 @@ export default function StudentInvoicesList({
         }
       />
 
-      {/* Task 21 — summary strip straight from GET /invoices/my/summary. */}
       {summaryQuery.isLoading ? (
         <div className="grid gap-3 sm:grid-cols-3">
           {[0, 1, 2].map((i) => (

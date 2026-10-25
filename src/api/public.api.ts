@@ -1,7 +1,6 @@
 import type { ApiResponse } from "@/components/types/api";
 import apiClient from "@/lib/apiClient";
 
-// Task 6B — public landing data. No auth needed.
 // Each helper falls back to [] / null so the landing page never crashes
 // when the backend is down or billing isn't configured yet.
 

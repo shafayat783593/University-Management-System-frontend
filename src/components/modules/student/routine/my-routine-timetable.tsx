@@ -37,7 +37,6 @@ function groupByDay(entries: MyRoutineEntry[]) {
   }));
 }
 
-// Task 22 — weekly class timetable across all enrolled sections.
 export default function MyRoutineTimetable() {
   const query = useMyRoutine();
   const entries = query.data ?? [];

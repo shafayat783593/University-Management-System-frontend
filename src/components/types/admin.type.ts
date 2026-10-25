@@ -36,8 +36,6 @@ export type PaymentStatus =
   | "CANCELLED"
   | "REFUNDED";
 
-/* GET /payments — one row per installment payment attempt.
-   Student/semester live under installment.fee (see TASKS.md Task 33). */
 export interface AdminPayment {
   id: string;
   installmentId: string;
@@ -73,7 +71,6 @@ export interface PaymentsParams {
   searchTerm?: string;
 }
 
-// Task 21 [installments] — GET /payments/my-fees.
 // One fee has 1+ installments ordered by number. Fee status is derived:
 // PENDING / PARTIALLY_PAID / PAID. ADMISSION = 1 non-refundable installment.
 export type FeeType = "ADMISSION" | "TUITION";

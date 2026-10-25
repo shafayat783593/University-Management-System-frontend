@@ -20,7 +20,6 @@ import FAQSection from "@/components/modules/public/home/faq-section";
 
 export const revalidate = 60;
 
-// Task 6B — landing data comes from public endpoints (no auth).
 // Each helper already falls back to [] / null, so the page never crashes.
 
 async function getAnnouncementsPreview(): Promise<Announcement[]> {

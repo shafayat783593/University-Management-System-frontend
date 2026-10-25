@@ -5,7 +5,6 @@ import { getAllInstructorApplications } from "./instructor.api";
 import { getAllSections } from "./sections.api";
 import { getAllSemesters } from "./semesters.api";
 
-// Simple shapes for the department detail page (Task 12).
 export interface DeptCourse {
   id: string;
   code: string;
@@ -53,7 +52,6 @@ export async function getDepartmentById(id: string) {
   return res.data;
 }
 
-// Task 12 — build the full detail from endpoints that really exist:
 // department + courses?departmentId + approved instructors + open semester sections.
 export async function getDepartmentDetails(
   id: string,

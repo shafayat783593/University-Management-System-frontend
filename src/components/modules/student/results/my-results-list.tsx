@@ -17,7 +17,6 @@ import { useAllMyResults } from "@/hooks";
 import { getApiErrorMessage } from "@/hooks/auth.hook";
 import { DuesBlockedNotice, isDuesBlocked } from "./dues-blocked-notice";
 
-// Task 17 — every subject's marks in one place.
 // One card per course, each listing every exam with
 // marksObtained / totalMarks / status.
 export default function MyResultsList() {

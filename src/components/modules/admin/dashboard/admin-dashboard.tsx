@@ -19,7 +19,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardSummary } from "@/hooks";
 import FinanceChart from "./finance-chart";
 
-// Task 27: admin dashboard from GET /dashboard/summary.
 export default function AdminDashboard() {
   const summary = useDashboardSummary();
 

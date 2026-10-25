@@ -244,7 +244,6 @@ function ResultsEntry({
   );
 }
 
-// Task 19: create exams + submit results for a section.
 export default function SectionExams({ sectionId }: { sectionId: string }) {
   const [activeExamId, setActiveExamId] = useState<string | null>(null);
 

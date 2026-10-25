@@ -122,7 +122,6 @@ export default function ApplyForm() {
     },
   });
 
-  // Prefill department from ?departmentId= (Task 6A CTA).
   useEffect(() => {
     if (preselectedDept) form.setFieldValue("departmentId", preselectedDept);
   }, [preselectedDept, form]);

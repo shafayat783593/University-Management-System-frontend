@@ -19,7 +19,6 @@ import {
 import { getApiErrorMessage } from "@/hooks/auth.hook";
 import { formatBDT, formatDueDate } from "@/lib/format";
 
-// Task 11 — landing page after login: admission + dues summary.
 // Data: GET /admission-applications/me + GET /invoices/my/summary.
 export default function StudentOverview() {
   const router = useRouter();

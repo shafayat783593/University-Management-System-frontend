@@ -213,7 +213,6 @@ function OverrideCard() {
   );
 }
 
-// Task 26: admin result publish + single-result override.
 export default function ResultsPublishManager() {
   return (
     <div className="flex flex-col gap-6">

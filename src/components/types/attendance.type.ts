@@ -26,7 +26,6 @@ export interface AttendanceRecord {
   session: AttendanceSession;
 }
 
-// Instructor side (Task 18) -------------------------------------
 
 export interface RosterStudent {
   id: string;
@@ -52,7 +51,6 @@ export interface SectionAttendanceSession {
   records: SessionRecord[];
 }
 
-// Student results (Task 14) ---------------------------------------
 
 export interface TranscriptCourse {
   courseCode: string;

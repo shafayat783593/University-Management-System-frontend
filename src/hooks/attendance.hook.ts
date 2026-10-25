@@ -16,7 +16,6 @@ export function useMyAttendance() {
   });
 }
 
-/* Instructor (Task 18) ------------------------------------------ */
 
 export function useSectionEnrollments(sectionId: string) {
   return useQuery({

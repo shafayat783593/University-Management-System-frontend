@@ -38,7 +38,6 @@ function formatDay(value: string) {
   });
 }
 
-// Task 28: admin announcements CRUD (GET /announcements/admin includes drafts).
 export default function AnnouncementsManager() {
   const [page, setPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);

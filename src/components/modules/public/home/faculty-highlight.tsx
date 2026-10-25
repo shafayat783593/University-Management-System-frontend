@@ -42,7 +42,6 @@ function initials(name: string) {
 }
 
 export default function FacultyHighlight({ instructors: initialInstructors, initialApplications }: FacultyHighlightProps) {
-  // Task 6B — GET /public/faculty (no auth). Falls back to SSR items.
   const { data: publicRows, isLoading, isError, refetch } = usePublicFacultyList(4);
 
   const liveItems: InstructorItem[] = (publicRows ?? []).map((f) => ({

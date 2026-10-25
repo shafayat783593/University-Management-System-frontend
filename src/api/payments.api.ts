@@ -7,7 +7,6 @@ import apiClient, { downloadBlobFile } from "@/lib/apiClient";
 
 /* Legacy installment-keyed flow (current pages use it — kept working) --- */
 
-// Task 21 [installments] — everything keys on installmentId, not feeId.
 export async function getMyFees() {
   const res = await apiClient<ApiResponse<StudentFee[]>>("/payments/my-fees");
   return res.data ?? [];
@@ -31,10 +30,7 @@ export async function cancelFeePayment(installmentId: string) {
   return res.data;
 }
 
-/* §7 contract API — invoice-keyed payments ---------------------------
- * Start here for anything new: one payment per invoice installment, paid
- * in order. Redirect the student to bkashURL, bKash returns them to
- * /payment/callback, which verifies through bkashCallback below. */
+
 
 // POST /payments/init { invoiceId, amount? } → bKash redirect info.
 // amount omitted = first unpaid installment in full; given = must equal it

@@ -19,7 +19,6 @@ import { useTranscript } from "@/hooks";
 import { DuesBlockedNotice, isDuesBlocked } from "./dues-blocked-notice";
 import { TranscriptActions } from "./result-actions";
 
-// Task 14: JSON transcript view + PDF download + email copy.
 export default function TranscriptView() {
   const query = useTranscript();
 

@@ -22,7 +22,6 @@ import { getApiErrorMessage } from "@/hooks/auth.hook";
 import { getApiErrorStatus } from "@/lib/apiClient";
 import { formatBDT } from "@/lib/format";
 
-// Task 21B — pick an OPEN semester → POST /invoices/semester/generate-my.
 // Tuition = billable credits × per-credit rate; server decides every taka.
 export default function SemesterInvoiceGenerator() {
   const semestersQuery = useSemesters();

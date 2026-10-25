@@ -89,7 +89,6 @@ const optionalText = (max: number, label: string) =>
     .max(max, `${label} must be under ${max} characters`)
     .optional();
 
-// Task 10 — every field optional, nothing required.
 export const studentInfoSchema = z.object({
   phone: z
     .string()

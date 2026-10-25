@@ -13,7 +13,6 @@ import { usePublicDepartmentCards } from "@/hooks/public.hook";
 import { formatBDT } from "@/lib/format";
 import { getApiErrorMessage } from "@/hooks/auth.hook";
 
-// "Enroll" checks admission confirmation first (Task 12):
 // not confirmed → my-fees banner, otherwise → enrollments.
 function EnrollButton({ semesterId }: { semesterId?: string }) {
   const router = useRouter();

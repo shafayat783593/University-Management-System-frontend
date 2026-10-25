@@ -41,7 +41,6 @@ function formatDay(value: string) {
   });
 }
 
-// Task 18: create session → mark present/absent → view history.
 export default function SectionAttendance({ sectionId }: { sectionId: string }) {
   const [date, setDate] = useState(todayInput);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);

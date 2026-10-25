@@ -3,7 +3,6 @@ import { initPayment } from "@/api";
 const RETURN_KEY = "payReturnTo";
 
 /**
- * Task 13 / §6 — start a bKash payment and hand the browser to the gateway.
  *
  * The server picks the amount (next unpaid installment) unless `amount` is
  * given and the invoice allows partial payment. `returnTo` is remembered so

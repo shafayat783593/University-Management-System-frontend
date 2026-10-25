@@ -1,6 +1,5 @@
 import z from "zod";
 
-// Task 13 — POST/PATCH /admission-applications.
 // Only `previousInstitution` is required; everything else is optional.
 // Year/GPA stay strings in the form (HTML inputs return strings) and are
 // converted to numbers in the submit handler.

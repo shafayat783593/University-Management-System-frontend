@@ -62,7 +62,6 @@ function RateCard({ fees }: { fees: FeeScheduleLine[] }) {
 }
 
 export default function ProgramsDepartments({ departments: initialDepartments, semesterName }: ProgramsDepartmentsProps) {
-  // Task 6B — GET /public/departments gives departments + feeSchedule + semester.
   const { data: live, isLoading, isError, refetch } = usePublicDepartmentCards();
 
   const list: DepartmentItem[] =
