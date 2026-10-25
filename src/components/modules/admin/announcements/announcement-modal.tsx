@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import type { Announcement } from "@/components/types";
@@ -30,6 +31,8 @@ export default function AnnouncementModal({
   const create = useCreateAnnouncement();
   const update = useUpdateAnnouncement();
   const saving = create.isPending || update.isPending;
+  const [image, setImage] = useState<File | null>(null);
+  const [category, setCategory] = useState<string>(editing?.category ?? "News");
 
   const form = useForm({
     defaultValues: {
@@ -48,6 +51,7 @@ export default function AnnouncementModal({
         title: value.title.trim(),
         body: value.body.trim(),
         isPublished: value.isPublished,
+        category,
       };
       const done = {
         onSuccess: () => {
@@ -57,8 +61,8 @@ export default function AnnouncementModal({
         onError: (err: unknown) =>
           toast.error(getApiErrorMessage(err, "Save failed.")),
       };
-      if (editing) update.mutate({ id: editing.id, ...payload }, done);
-      else create.mutate(payload, done);
+      if (editing) update.mutate({ id: editing.id, ...payload, image: image ?? undefined }, done);
+      else create.mutate({ ...payload, image: image ?? undefined }, done);
     },
   });
 
@@ -100,6 +104,22 @@ export default function AnnouncementModal({
             )}
           </form.Field>
 
+          <label className="flex flex-col gap-1 text-sm font-medium">
+            Category
+            <select
+              className={inputClass}
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="All News">All News</option>
+              <option value="Events">Events</option>
+              <option value="Academic">Academic</option>
+              <option value="Campus & Community">Campus & Community</option>
+              <option value="Media Corner">Media Corner</option>
+              <option value="News">News</option>
+            </select>
+          </label>
+
           <form.Field name="body">
             {(field) => (
               <label className="flex flex-col gap-1 text-sm font-medium">
@@ -115,6 +135,23 @@ export default function AnnouncementModal({
               </label>
             )}
           </form.Field>
+
+          <label className="flex flex-col gap-1 text-sm font-medium">
+            Image (optional)
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+              className={inputClass}
+            />
+            {editing?.imageUrl && (
+              <img
+                src={editing.imageUrl}
+                alt="Current"
+                className="mt-2 h-24 w-full object-cover rounded-lg"
+              />
+            )}
+          </label>
 
           <form.Field name="isPublished">
             {(field) => (

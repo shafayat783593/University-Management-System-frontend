@@ -6,6 +6,9 @@ export interface Announcement {
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+  imageUrl?: string | null;
+  imagePublicId?: string | null;
+  category?: string;
 }
 
 export interface PaginatedMeta {

@@ -21,6 +21,13 @@ export default function AnnouncementCard({
       href={`/announcements/${announcement.id}`}
       className="card-hover flex h-full flex-col gap-2 rounded-2xl border bg-card p-5 shadow-soft"
     >
+      {announcement.imageUrl && (
+        <img
+          src={announcement.imageUrl}
+          alt={`Announcement image for ${announcement.title}`}
+          className="w-full h-48 object-cover rounded-lg"
+        />
+      )}
       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary">
         <Megaphone className="size-3.5" />
         {formatAnnouncementDate(announcement.createdAt)}

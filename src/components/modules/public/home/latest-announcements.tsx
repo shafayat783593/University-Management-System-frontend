@@ -23,7 +23,12 @@ function formatDate(value?: string) {
 
 export default function LatestAnnouncements({ announcements: initialAnnouncements }: LatestAnnouncementsProps) {
   // Real API: GET /announcements?page=1&limit=3
-  const { data, isLoading, isError, refetch } = usePublishedAnnouncements(1, 3, initialAnnouncements);
+  const { data, isLoading, isError, refetch } = usePublishedAnnouncements(
+    1,
+    3,
+    undefined,
+    initialAnnouncements,
+  );
 
   const activeList = (data?.items ?? []).slice(0, 3);
 

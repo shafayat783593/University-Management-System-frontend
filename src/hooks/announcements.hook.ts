@@ -11,11 +11,12 @@ import {
 export function usePublishedAnnouncements(
   page: number,
   limit = 10,
+  category?: string,
   initialItems?: import("@/components/types").Announcement[],
 ) {
   return useQuery({
-    queryKey: ["announcements", "published", page, limit],
-    queryFn: () => getPublishedAnnouncements({ page, limit }),
+    queryKey: ["announcements", "published", page, limit, category],
+    queryFn: () => getPublishedAnnouncements({ page, limit, category }),
     initialData:
       initialItems !== undefined
         ? { items: initialItems, meta: undefined as never }
@@ -34,24 +35,48 @@ function useInvalidateAnnouncements() {
   };
 }
 
-export function useAdminAnnouncements(page = 1) {
+export function useAdminAnnouncements(page = 1, category?: string) {
   return useQuery({
-    queryKey: ["announcements", "admin", page],
-    queryFn: () => getAdminAnnouncements(page),
+    queryKey: ["announcements", "admin", page, category],
+    queryFn: () => getAdminAnnouncements(page, 10, category),
     placeholderData: (prev) => prev,
   });
 }
 
+type CreateInput = AnnouncementPayload & { image?: File };
+type UpdateInput = { id: string } & Partial<AnnouncementPayload> & { image?: File };
+
 export function useCreateAnnouncement() {
   const invalidate = useInvalidateAnnouncements();
-  return useMutation({ mutationFn: createAnnouncement, onSuccess: invalidate });
+  return useMutation({
+    mutationFn: (input: CreateInput) =>
+      createAnnouncement(
+        {
+          title: input.title,
+          body: input.body,
+          isPublished: input.isPublished,
+          category: input.category,
+        },
+        input.image,
+      ),
+    onSuccess: invalidate,
+  });
 }
 
 export function useUpdateAnnouncement() {
   const invalidate = useInvalidateAnnouncements();
   return useMutation({
-    mutationFn: ({ id, ...payload }: { id: string } & Partial<AnnouncementPayload>) =>
-      updateAnnouncement(id, payload),
+    mutationFn: (input: UpdateInput) =>
+      updateAnnouncement(
+        input.id,
+        {
+          title: input.title,
+          body: input.body,
+          isPublished: input.isPublished,
+          category: input.category,
+        },
+        input.image,
+      ),
     onSuccess: invalidate,
   });
 }

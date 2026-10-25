@@ -139,12 +139,23 @@ export default function AnnouncementsManager() {
                 {rows.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell>
-                      <span className="block max-w-64 truncate text-sm font-semibold">
-                        {row.title}
-                      </span>
-                      <span className="block max-w-64 truncate text-xs text-muted-foreground">
-                        {row.body}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        {row.imageUrl && (
+                          <img
+                            src={row.imageUrl}
+                            alt={row.title}
+                            className="h-10 w-16 rounded object-cover"
+                          />
+                        )}
+                        <div>
+                          <span className="block max-w-64 truncate text-sm font-semibold">
+                            {row.title}
+                          </span>
+                          <span className="block max-w-64 truncate text-xs text-muted-foreground">
+                            {row.body}
+                          </span>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <button

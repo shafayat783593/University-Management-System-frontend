@@ -6,14 +6,26 @@ import { usePublishedAnnouncements } from "@/hooks";
 import TablePagination from "@/components/ui/table.pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import AnnouncementCard from "@/components/modules/announcements/announcement-card";
+import { Button } from "@/components/ui/button";
 
 const PAGE_SIZE = 9;
 
+const CATEGORIES = [
+  "All News",
+  "Events",
+  "Academic",
+  "Campus & Community",
+  "Media Corner",
+];
+
 export default function AnnouncementsList() {
   const [page, setPage] = useState(1);
+  const [category, setCategory] = useState<string>("All News");
+
   const { data, isLoading, isError, refetch } = usePublishedAnnouncements(
     page,
     PAGE_SIZE,
+    category === "All News" ? undefined : category,
   );
 
   const items = data?.items ?? [];
@@ -27,6 +39,22 @@ export default function AnnouncementsList() {
       <p className="mt-1 max-w-xl text-sm text-muted-foreground">
         Official notices and news from the university administration.
       </p>
+
+      <div className="mt-6 flex flex-wrap gap-2">
+        {CATEGORIES.map((c) => (
+          <Button
+            key={c}
+            variant={category === c ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              setCategory(c);
+              setPage(1);
+            }}
+          >
+            {c}
+          </Button>
+        ))}
+      </div>
 
       <div className="mt-6">
         {isLoading ? (
