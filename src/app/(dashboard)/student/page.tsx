@@ -1,12 +1,14 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { ArrowRight, GraduationCap, ReceiptText, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   DashboardPageHeader,
   DashboardPanel,
+  StatCards,
 } from "@/components/dashboard/dashboard-ui";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,9 +21,11 @@ import {
 import { getApiErrorMessage } from "@/hooks/auth.hook";
 import { formatBDT, formatDueDate } from "@/lib/format";
 
-// Data: GET /admission-applications/me + GET /invoices/my/summary.
+const ease = [0.21, 1.02, 0.73, 1] as const;
+
 export default function StudentOverview() {
   const router = useRouter();
+  const reduce = useReducedMotion();
   const admissionQuery = useMyAdmissionApplication();
   const summaryQuery = useMyInvoiceSummary();
   const pay = useInitPayment();
@@ -34,9 +38,10 @@ export default function StudentOverview() {
       <div className="flex flex-col gap-6">
         <Skeleton className="h-10 w-72" />
         <Skeleton className="h-28 w-full" />
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Skeleton className="h-48 w-full" />
-          <Skeleton className="h-48 w-full" />
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
+          <Skeleton className="h-28 w-full" />
         </div>
       </div>
     );
@@ -71,7 +76,6 @@ export default function StudentOverview() {
   const next = summary?.nextInstallment ?? null;
   const overdue = summary?.overdueInstallments ?? [];
 
-  // Primary call-to-action changes with state.
   const cta = !app
     ? { href: "/student/admission-application", label: "Apply now" }
     : !mine?.admissionConfirmed
@@ -90,7 +94,6 @@ export default function StudentOverview() {
             toast.error("The payment gateway did not return a bKash URL.");
             return;
           }
-          // The dashboard lives at /student — there is no /student/dashboard.
           sessionStorage.setItem("payReturnTo", "/student");
           window.location.href = data.bkashURL;
         },
@@ -100,23 +103,67 @@ export default function StudentOverview() {
     );
   }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <DashboardPageHeader
-        title="Student dashboard"
-        subtitle="Admission status and dues at a glance."
-        action={
-          <Link
-            href={cta.href}
-            className="gradient-brand inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-white shadow-pop transition-opacity hover:opacity-90"
-          >
-            {cta.label}
-            <ArrowRight className="size-4" />
-          </Link>
-        }
-      />
+  const container: Variants | undefined = reduce
+    ? undefined
+    : { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
+  const item: Variants | undefined = reduce
+    ? undefined
+    : {
+        hidden: { opacity: 0, y: 16 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.45, ease } },
+      };
 
-      <div className="grid items-start gap-4 lg:grid-cols-2">
+  const stats = [
+    {
+      label: "Total fees",
+      value: formatBDT(summary?.totalFees ?? 0),
+      hint: "Invoiced to date",
+      icon: Wallet,
+      tone: "violet" as const,
+    },
+    {
+      label: "Paid",
+      value: formatBDT(summary?.totalPaid ?? 0),
+      hint: "Confirmed payments",
+      icon: GraduationCap,
+      tone: "green" as const,
+    },
+    {
+      label: "Outstanding",
+      value: formatBDT(summary?.outstandingBalance ?? 0),
+      hint:
+        (summary?.outstandingBalance ?? 0) > 0
+          ? "Needs attention"
+          : "All clear",
+      icon: ReceiptText,
+      tone: "amber" as const,
+    },
+  ];
+
+  return (
+    <motion.div
+      variants={container}
+      initial={reduce ? false : "hidden"}
+      animate={reduce ? undefined : "show"}
+      className="flex flex-col gap-6"
+    >
+      <motion.div variants={item}>
+        <DashboardPageHeader
+          title="Student dashboard"
+          subtitle="Admission status and dues at a glance."
+          action={
+            <Link
+              href={cta.href}
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90"
+            >
+              {cta.label}
+              <ArrowRight className="size-4" />
+            </Link>
+          }
+        />
+      </motion.div>
+
+      <motion.div variants={item}>
         <DashboardPanel
           title="Admission"
           subtitle="Live from your admission file"
@@ -147,20 +194,19 @@ export default function StudentOverview() {
               </Link>
             </p>
           ) : (
-            <div className="flex flex-col gap-2 text-sm">
+            <div className="flex flex-col gap-3 text-sm">
               {mine?.studentIdCode ? (
-                <p>
-                  Student ID: <strong>{mine.studentIdCode}</strong>
-                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">Student ID</span>
+                  <span className="font-bold tabular-nums">
+                    {mine.studentIdCode}
+                  </span>
+                </div>
               ) : (
-                <p>
-                  <Badge variant="warning">
-                    Pending admission confirmation
-                  </Badge>
-                </p>
+                <Badge variant="warning">Pending admission confirmation</Badge>
               )}
               {app.status === "REJECTED" ? (
-                <p className="text-[13px]">
+                <p className="text-[13px] text-destructive">
                   Reason: {app.rejectionReason ?? "Contact the office."}
                 </p>
               ) : null}
@@ -186,82 +232,87 @@ export default function StudentOverview() {
             </div>
           )}
         </DashboardPanel>
+      </motion.div>
 
+      <motion.div variants={item}>
+        <StatCards stats={stats} />
+      </motion.div>
+
+      <motion.div variants={item}>
         <DashboardPanel
           title="Dues summary"
           subtitle="Server totals — never computed here"
+          action={
+            next ? (
+              <Button
+                size="sm"
+                disabled={pay.isPending}
+                onClick={handlePayNext}
+                className="rounded-lg"
+              >
+                {pay.isPending ? "Starting…" : "Pay next"}
+              </Button>
+            ) : null
+          }
         >
-          <dl className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-xl bg-muted/60 p-3">
-              <dt className="text-[11px] text-muted-foreground">Total fees</dt>
-              <dd className="mt-0.5 font-bold tabular-nums">
-                {formatBDT(summary?.totalFees ?? 0)}
-              </dd>
+          {next ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/60 bg-muted/40 p-3 text-sm">
+              <span>
+                Next:{" "}
+                <strong className="tabular-nums">
+                  {formatBDT(next.remaining)}
+                </strong>{" "}
+                by <strong>{formatDueDate(next.dueDate)}</strong>
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {overdue.length > 0 ? `${overdue.length} overdue` : "On track"}
+              </span>
             </div>
-            <div className="rounded-xl bg-muted/60 p-3">
-              <dt className="text-[11px] text-muted-foreground">Paid</dt>
-              <dd className="mt-0.5 font-bold tabular-nums text-success">
-                {formatBDT(summary?.totalPaid ?? 0)}
-              </dd>
-            </div>
-            <div className="rounded-xl bg-destructive/[0.07] p-3">
-              <dt className="text-[11px] text-muted-foreground">Outstanding</dt>
-              <dd className="mt-0.5 font-bold tabular-nums text-destructive">
-                {formatBDT(summary?.outstandingBalance ?? 0)}
-              </dd>
-            </div>
-          </dl>
-          <div className="mt-3">
-            {next ? (
-              <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 text-sm">
-                <span>
-                  Next: <strong>{formatBDT(next.remaining)}</strong> by{" "}
-                  <strong>{formatDueDate(next.dueDate)}</strong>
-                </span>
-                <Button
-                  size="sm"
-                  disabled={pay.isPending}
-                  onClick={handlePayNext}
-                >
-                  {pay.isPending ? "Starting…" : "Pay"}
-                </Button>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No pending installment.
-              </p>
-            )}
-          </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No pending installment.
+            </p>
+          )}
         </DashboardPanel>
-      </div>
+      </motion.div>
 
       {overdue.length > 0 ? (
-        <DashboardPanel
-          title="Overdue"
-          subtitle="Pay these first — viewing results is blocked until clear"
-        >
-          <ul className="flex flex-col gap-2">
-            {overdue.map((o) => (
-              <li
-                key={o.installmentId}
-                className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm"
-              >
-                <span className="font-semibold text-destructive">
-                  Installment {o.number} · {formatBDT(o.remaining)} · due{" "}
-                  {formatDueDate(o.dueDate)}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => router.push("/student/payments/my-fees")}
+        <motion.div variants={item}>
+          <DashboardPanel
+            title="Overdue"
+            subtitle="Pay these first — viewing results is blocked until clear"
+          >
+            <ul className="flex flex-col gap-2">
+              {overdue.map((o, index) => (
+                <motion.li
+                  key={o.installmentId}
+                  initial={reduce ? false : { opacity: 0, y: 8 }}
+                  animate={reduce ? undefined : { opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: reduce ? 0 : Math.min(index * 0.05, 0.3),
+                    ease,
+                  }}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm"
                 >
-                  Pay now
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </DashboardPanel>
+                  <span className="font-semibold text-destructive">
+                    Installment {o.number} · {formatBDT(o.remaining)} · due{" "}
+                    {formatDueDate(o.dueDate)}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => router.push("/student/payments/my-fees")}
+                    className="rounded-lg"
+                  >
+                    Pay now
+                  </Button>
+                </motion.li>
+              ))}
+            </ul>
+          </DashboardPanel>
+        </motion.div>
       ) : null}
-    </div>
+    </motion.div>
   );
 }
