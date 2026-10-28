@@ -98,7 +98,7 @@ export default function AdmissionReviewList() {
 
   // console.log("AdmissionReviewList query", query.data);
 
-  const rows = Array.isArray(query.data?.data) ? query.data?.data : [];
+  const rows = Array.isArray(query.data) ? query.data : [];
   return (
     <div className="flex flex-col gap-6">
       <DashboardPageHeader

@@ -3,6 +3,7 @@ export * from "./admission.hook";
 export * from "./announcements.hook";
 export * from "./attendance.hook";
 export * from "./auth.hook";
+export * from "./dashboard.hook";
 export * from "./departments.hook";
 export * from "./enrollments.hook";
 export * from "./exams.hook";

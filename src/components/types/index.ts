@@ -1,5 +1,6 @@
 export * from "./admin.type";
 export * from "./announcement.type";
+export * from "./dashboard.type";
 export * from "./api";
 export * from "./attendance.type";
 export * from "./auth.type";

@@ -3,6 +3,7 @@ export * from "./admission.api";
 export * from "./announcements.api";
 export * from "./attendance.api";
 export * from "./auth.api";
+export * from "./dashboard.api";
 export * from "./department.api";
 export * from "./enrollments.api";
 export * from "./exams.api";
