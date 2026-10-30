@@ -24,6 +24,18 @@ export interface AdmissionApplication {
   reviewedAt?: string | null;
 }
 
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: PaginationMeta;
+}
+
 export interface AdmissionMiniInvoice {
   id: string;
   invoiceNumber: string | null;
@@ -58,15 +70,12 @@ export interface AdmissionApplicationPayload {
 }
 
 export async function getMyAdmissionApplication() {
-  const res = await apiClient<ApiResponse<MyAdmission | null>>(
-    "/admission-applications/me",
-  );
+  const res = await apiClient<ApiResponse<MyAdmission | null>>("/admission-applications/me");
   return res.data ?? null;
 }
 
 // POST — first-time submit (402 = fee unpaid, 409 = already submitted).
-export async function submitAdmissionApplication(
-  payload: AdmissionApplicationPayload,
+export async function submitAdmissionApplication( payload: AdmissionApplicationPayload,
 ) {
   const res = await apiClient<ApiResponse<AdmissionApplication>>(
     "/admission-applications",
@@ -98,10 +107,12 @@ export interface AdmissionListRow extends AdmissionApplication {
 
 export async function getAdmissionApplications(status?: string) {
   const qs = status && status !== "ALL" ? `?status=${status}` : "";
-  const res = await apiClient<ApiResponse<AdmissionListRow[]>>(
- `/admission-applications${qs}`,
-  );
-  return res.data.data;
+
+  const res = await apiClient<
+    ApiResponse<PaginatedResponse<AdmissionListRow>>
+  >(`/admission-applications${qs}`);
+
+  return res.data;
 }
 
 export interface ReviewAdmissionPayload {
@@ -116,12 +127,8 @@ export interface ReviewAdmissionResult {
   admissionConfirmed: boolean;
 }
 
-export async function reviewAdmissionApplication(
-  id: string,
-  payload: ReviewAdmissionPayload,
-) {
-  const res = await apiClient<ApiResponse<ReviewAdmissionResult>>(
-    `/admission-applications/${id}/review`,
+export async function reviewAdmissionApplication(id: string,payload: ReviewAdmissionPayload) {
+  const res = await apiClient<ApiResponse<ReviewAdmissionResult>>(`/admission-applications/${id}/review`,
     { method: "PATCH", body: payload },
   );
   return res.data;

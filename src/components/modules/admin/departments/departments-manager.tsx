@@ -29,6 +29,7 @@ export default function DepartmentsManager() {
   const [editing, setEditing] = useState<Department | null>(null);
 
   const list = useDepartments(page);
+  console.log("list",list)
   const remove = useDeleteDepartment();
 
   const rows = list.data?.items ?? [];

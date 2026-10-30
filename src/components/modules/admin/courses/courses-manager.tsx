@@ -30,7 +30,7 @@ export default function CoursesManager() {
   const courses = useCourses();
   const remove = useDeleteCourse();
 
-  const rows = courses.data ?? [];
+  const rows = courses.data ?? []
 
   function openAdd() {
     setEditing(null);
