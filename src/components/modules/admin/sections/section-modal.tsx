@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { Section } from "@/components/types";
 import { Button } from "@/components/ui/button";
@@ -37,9 +37,35 @@ export default function SectionModal({
 }: SectionModalProps) {
   const [courseId, setCourseId] = useState(editing?.courseId ?? "");
   const [semesterId, setSemesterId] = useState(editing?.semesterId ?? "");
-  const [instructorId, setInstructorId] = useState(editing?.instructorId ?? "");
+  const [instructorId, setInstructorId] = useState(
+    editing?.instructorId ?? editing?.instructors?.find((i) => i.isPrimary)?.id ?? "",
+  );
+  const [coIds, setCoIds] = useState<string[]>(
+    editing?.coInstructors?.map((c) => c.instructorId) ??
+      editing?.instructors?.filter((i) => !i.isPrimary).map((i) => i.id) ??
+      [],
+  );
   const [capacity, setCapacity] = useState(String(editing?.capacity ?? 40));
   const [schedule, setSchedule] = useState(editing?.schedule ?? "");
+
+  useEffect(() => {
+    if (open) {
+      setCourseId(editing?.courseId ?? "");
+      setSemesterId(editing?.semesterId ?? "");
+      setInstructorId(
+        editing?.instructorId ??
+          editing?.instructors?.find((i) => i.isPrimary)?.id ??
+          "",
+      );
+      setCoIds(
+        editing?.coInstructors?.map((c) => c.instructorId) ??
+          editing?.instructors?.filter((i) => !i.isPrimary).map((i) => i.id) ??
+          [],
+      );
+      setCapacity(String(editing?.capacity ?? 40));
+      setSchedule(editing?.schedule ?? "");
+    }
+  }, [open, editing]);
 
   const courses = useCourses();
   const semesters = useSemesters(1);
@@ -47,6 +73,21 @@ export default function SectionModal({
   const create = useCreateSection();
   const update = useUpdateSection();
   const busy = create.isPending || update.isPending;
+
+  const instructorList = instructors.data ?? [];
+  const coOptions = instructorList.filter((i) => i.id !== instructorId);
+
+  function toggleCo(id: string) {
+    setCoIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  }
+
+  function handleLeadChange(value: string) {
+    setInstructorId(value);
+    // remove lead from co chips automatically
+    setCoIds((prev) => prev.filter((x) => x !== value));
+  }
 
   function save() {
     const seats = Number(capacity);
@@ -56,11 +97,11 @@ export default function SectionModal({
     }
 
     if (editing) {
-      // Course and semester are fixed after creation (backend rule).
       update.mutate(
         {
           id: editing.id,
           instructorId: instructorId || undefined,
+          coInstructorIds: coIds,
           capacity: seats,
           schedule: schedule.trim() || undefined,
         },
@@ -83,6 +124,7 @@ export default function SectionModal({
           courseId,
           semesterId,
           instructorId,
+          coInstructorIds: coIds.length ? coIds : undefined,
           capacity: seats,
           schedule: schedule.trim() || undefined,
         },
@@ -150,12 +192,12 @@ export default function SectionModal({
             </select>
           </div>
           <div className="flex flex-col gap-1 text-sm font-medium">
-            <label htmlFor="sec-instructor">Instructor (approved only)</label>
+            <label htmlFor="sec-instructor">Lead instructor (approved only)</label>
             <select
               id="sec-instructor"
               className={inputClass}
               value={instructorId}
-              onChange={(e) => setInstructorId(e.target.value)}
+              onChange={(e) => handleLeadChange(e.target.value)}
             >
               <option value="">Select instructor…</option>
               {(instructors.data ?? []).map((i) => (
@@ -163,6 +205,45 @@ export default function SectionModal({
                   {i.user.name} — {i.department.name}
                 </option>
               ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1 text-sm font-medium">
+            <label>Co-instructors (optional)</label>
+            <div className="flex flex-wrap gap-1">
+              {coIds.map((id) => {
+                const inst = instructorList.find((i) => i.id === id);
+                return (
+                  <span
+                    key={id}
+                    className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs"
+                  >
+                    {inst?.user?.name ?? id}
+                    <button
+                      type="button"
+                      onClick={() => toggleCo(id)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+            <select
+              className={inputClass}
+              value=""
+              onChange={(e) => {
+                if (e.target.value) toggleCo(e.target.value);
+              }}
+            >
+              <option value="">Add co-instructor…</option>
+              {coOptions
+                .filter((i) => !coIds.includes(i.id))
+                .map((i) => (
+                  <option key={i.id} value={i.id}>
+                    {i.user.name} — {i.department.name}
+                  </option>
+                ))}
             </select>
           </div>
           <div className="flex flex-col gap-1 text-sm font-medium">

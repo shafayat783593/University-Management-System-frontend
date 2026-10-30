@@ -222,6 +222,7 @@ export function useUpdateSection() {
     }: {
       id: string;
       instructorId?: string;
+      coInstructorIds?: string[];
       capacity?: number;
       schedule?: string;
     }) => updateSection(id, payload),

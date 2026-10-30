@@ -96,9 +96,9 @@ export default function AdmissionReviewList() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("SUBMITTED");
   const query = useAdmissionApplications(tab);
 
-  // console.log("AdmissionReviewList query", query.data);
+  const rows = Array.isArray(query?.data) ? query.data : [];
 
-  const rows = Array.isArray(query.data) ? query.data : [];
+// console.log(rows.data)
   return (
     <div className="flex flex-col gap-6">
       <DashboardPageHeader

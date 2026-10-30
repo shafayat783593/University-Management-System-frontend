@@ -42,6 +42,15 @@ export interface SectionInstructor {
   user?: SectionInstructorUser;
 }
 
+export interface SectionCoInstructor {
+  instructorId: string;
+  instructor?: SectionInstructor;
+}
+
+export interface SectionInstructorEntry extends SectionInstructor {
+  isPrimary: boolean;
+}
+
 export interface Section {
   id: string;
   courseId: string;
@@ -53,6 +62,8 @@ export interface Section {
   course: SectionCourse;
   semester: SectionSemester;
   instructor?: SectionInstructor;
+  coInstructors?: SectionCoInstructor[];
+  instructors?: SectionInstructorEntry[];
   _count?: {
     enrollments?: number;
     attendanceSessions?: number;

@@ -88,6 +88,13 @@ export default function MySections() {
                     <span className="block text-xs font-normal text-muted-foreground">
                       {row.course.title}
                     </span>
+                    <span className="mt-1 inline-block">
+                      <Badge variant="secondary">
+                        {row.instructors?.find((i) => i.id === instructorId)?.isPrimary
+                          ? "Lead"
+                          : "Co-instructor"}
+                      </Badge>
+                    </span>
                   </TableCell>
                   <TableCell>
                     {row.semester.name}

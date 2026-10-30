@@ -99,10 +99,9 @@ export interface AdmissionListRow extends AdmissionApplication {
 export async function getAdmissionApplications(status?: string) {
   const qs = status && status !== "ALL" ? `?status=${status}` : "";
   const res = await apiClient<ApiResponse<AdmissionListRow[]>>(
-    `/admission-applications${qs}`,
+ `/admission-applications${qs}`,
   );
-  console.log("getAdmissionApplications res", res.data);
-  return res.data;
+  return res.data.data;
 }
 
 export interface ReviewAdmissionPayload {

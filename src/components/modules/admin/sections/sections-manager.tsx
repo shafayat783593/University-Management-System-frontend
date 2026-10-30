@@ -114,7 +114,37 @@ export default function SectionsManager() {
                       </span>
                     </TableCell>
                     <TableCell>{row.semester.name}</TableCell>
-                    <TableCell>{row.instructor?.user?.name ?? "—"}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-sm font-medium">
+                          Lead: {row.instructors?.find((i) => i.isPrimary)?.user?.name ?? row.instructor?.user?.name ?? "—"}
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {(row.instructors ?? [])
+                            .filter((i) => !i.isPrimary)
+                            .slice(0, 2)
+                            .map((i) => (
+                              <span
+                                key={i.id}
+                                className="rounded-full border px-1.5 py-0.5 text-[10px]"
+                              >
+                                {i.user?.name ?? "—"}
+                              </span>
+                            ))}
+                          {(row.instructors ?? []).filter((i) => !i.isPrimary).length > 2 ? (
+                            <span
+                              className="rounded-full border px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                              title={(row.instructors ?? [])
+                                .filter((i) => !i.isPrimary)
+                                .map((i) => i.user?.name)
+                                .join(", ")}
+                            >
+                              +{(row.instructors ?? []).filter((i) => !i.isPrimary).length - 2} co
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       {row.enrolledCount}/{row.capacity}
                     </TableCell>

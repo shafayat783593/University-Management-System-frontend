@@ -206,6 +206,7 @@ export async function createSection(payload: {
   courseId: string;
   semesterId: string;
   instructorId: string;
+  coInstructorIds?: string[];
   capacity: number;
   schedule?: string;
 }) {
@@ -215,7 +216,12 @@ export async function createSection(payload: {
 
 export async function updateSection(
   id: string,
-  payload: { instructorId?: string; capacity?: number; schedule?: string },
+  payload: {
+    instructorId?: string;
+    coInstructorIds?: string[];
+    capacity?: number;
+    schedule?: string;
+  },
 ) {
   const res = await apiClient(`/sections/${id}`, {
     method: "PATCH",

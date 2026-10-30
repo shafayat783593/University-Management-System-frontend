@@ -101,6 +101,8 @@ export function useVerifyPayment() {
     mutationFn: (id: string) => verifyPayment(id),
     onSuccess: () => {
       invalidateMoneyState(queryClient);
+      // Redirect to payment confirmation page after successful verification
+      window.location.href = "/student/payments/my-fees";
     },
   });
 }
