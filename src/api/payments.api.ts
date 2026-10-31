@@ -150,20 +150,51 @@ export interface BkashCallbackResult {
   payment?: unknown;
 }
 
+/** Detect an abort/timeout so we can surface a friendly message instead of */
+/** a generic network error (§2). */
+function isTimeoutError(err: unknown): boolean {
+  const cause = (err as { cause?: { name?: string } })?.cause;
+  if (cause?.name === "TimeoutError" || cause?.name === "AbortError") return true;
+  const msg = (err as { message?: string })?.message ?? "";
+  return /aborted|timed out|timeout/i.test(msg);
+}
+
+const BKASH_CALLBACK_TIMEOUT_MS = 60_000;
+const BKASH_VERIFY_TIMEOUT_MS = 30_000;
+
 export async function bkashCallback(paymentID: string, status: string) {
-  const res = await apiClient<ApiResponse<BkashCallbackResult>>(
-    `/payments/bkash/callback?paymentID=${encodeURIComponent(paymentID)}&status=${encodeURIComponent(status)}`,
-  );
-  return res.data;
+  try {
+    const res = await apiClient<ApiResponse<BkashCallbackResult>>(
+      `/payments/bkash/callback?paymentID=${encodeURIComponent(paymentID)}&status=${encodeURIComponent(status)}`,
+      { timeout: BKASH_CALLBACK_TIMEOUT_MS },
+    );
+    return res.data;
+  } catch (err) {
+    if (isTimeoutError(err)) {
+      throw new Error(
+        "Verification is taking too long. Refresh this page in a minute — the server is idempotent.",
+      );
+    }
+    throw err;
+  }
 }
 
 // POST /payments/:id/verify — idempotent retry when callback breaks (§2).
 export async function verifyPayment(id: string) {
-  const res = await apiClient<ApiResponse<BkashCallbackResult>>(
-    `/payments/${id}/verify`,
-    { method: "POST" },
-  );
-  return res.data;
+  try {
+    const res = await apiClient<ApiResponse<BkashCallbackResult>>(
+      `/payments/${id}/verify`,
+      { method: "POST", timeout: BKASH_VERIFY_TIMEOUT_MS },
+    );
+    return res.data;
+  } catch (err) {
+    if (isTimeoutError(err)) {
+      throw new Error(
+        "Verification is taking too long. Refresh this page in a minute — the server is idempotent.",
+      );
+    }
+    throw err;
+  }
 }
 
 // GET /payments/receipts/:paymentId — PDF download (PAID only).

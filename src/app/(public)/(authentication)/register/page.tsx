@@ -4,6 +4,7 @@ import { Newsreader } from "next/font/google";
 
 import { LoginForm } from "@/components/from/login-from";
 import RegisterForm from "@/components/from/register-form";
+import GuestGuard from "@/components/auth/guest.guard";
 
 const newsreader = Newsreader({
   subsets: ["latin"],
@@ -20,7 +21,8 @@ const stats = [
 
 export default function RegisterPage() {
   return (
-    <div className={`${newsreader.variable} grid min-h-svh lg:grid-cols-[minmax(0,560px)_1fr] xl:grid-cols-[minmax(0,600px)_1fr]`}>
+    <GuestGuard>
+      <div className={`${newsreader.variable} grid min-h-svh lg:grid-cols-[minmax(0,560px)_1fr] xl:grid-cols-[minmax(0,600px)_1fr]`}>
       {/* Form side */}
       <div className="flex flex-col gap-10 px-6 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-12">
         <Link href="/" className="flex items-center gap-3">
@@ -89,5 +91,6 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+    </GuestGuard>
   );
 }

@@ -96,10 +96,7 @@ export default function AdmissionReviewList() {
   const [tab, setTab] = useState<(typeof TABS)[number]>("SUBMITTED");
   const query = useAdmissionApplications(tab);
 console.log("quary",query)
-  // const rows = Array.isArray(query?.data) ? query.data : [];
-
-  // console.log("rows............", rows)
-  // console.log("roes dat ....", rows?.data)
+ 
   
   const rows = query.data?.data ?? [];
   const meta = query.data?.meta;

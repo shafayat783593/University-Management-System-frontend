@@ -78,16 +78,7 @@ export default function Hero() {
             animate="show"
             className="flex flex-col items-start gap-6 lg:col-span-7"
           >
-            <motion.div
-              variants={staggerChild}
-              className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary backdrop-blur-sm"
-            >
-              <span className="relative flex size-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                <span className="relative inline-flex size-2 rounded-full bg-primary" />
-              </span>
-              <span>Admissions Open for Academic Year 2026–2027</span>
-            </motion.div>
+          
 
             <motion.h1
               variants={staggerChild}
