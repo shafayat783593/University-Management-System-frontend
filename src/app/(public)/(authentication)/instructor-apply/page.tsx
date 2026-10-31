@@ -1,6 +1,6 @@
+import { Newsreader } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
-import { Newsreader } from "next/font/google";
 
 import InstructorApplyForm from "@/components/from/Instructor-from";
 
@@ -19,9 +19,11 @@ const stats = [
 
 export default function InstructorApply() {
   return (
-    <div className={`${newsreader.variable} grid min-h-svh lg:grid-cols-[minmax(0,480px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]`}>
+    <div
+      className={`${newsreader.variable} grid min-h-svh lg:h-svh lg:overflow-hidden lg:grid-cols-[minmax(0,480px)_1fr] xl:grid-cols-[minmax(0,520px)_1fr]`}
+    >
       {/* Form side */}
-      <div className="flex flex-col gap-10 px-6 py-8 sm:px-10 sm:py-10 lg:px-14 lg:py-12">
+      <div className="flex flex-col gap-6 px-6 py-6 sm:px-10 sm:py-8 lg:gap-8 lg:px-14 lg:py-10">
         <Link href="/" className="flex items-center gap-3">
           <span className="grid size-10 place-items-center rounded-lg bg-primary text-primary-foreground">
             <span className="font-[family-name:var(--font-newsreader)] text-base font-semibold">
@@ -45,14 +47,15 @@ export default function InstructorApply() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground lg:text-left">
-          © {new Date().getFullYear()} Northfield University. All rights reserved.
+          © {new Date().getFullYear()} Northfield University. All rights
+          reserved.
         </p>
       </div>
 
       {/* Image side */}
       <div className="relative hidden lg:block">
         <Image
-          src="/doctorLogin.webp"
+          src="/instructor-apply.jpg"
           alt="Students walking across the Northfield University campus"
           fill
           priority
@@ -66,8 +69,8 @@ export default function InstructorApply() {
         {/* Overlaid brand content */}
         <div className="absolute inset-x-0 bottom-0 flex flex-col gap-8 p-12 xl:p-16">
           <p className="font-[family-name:var(--font-newsreader)] max-w-md text-[26px] italic leading-snug text-white xl:text-[30px]">
-            &ldquo;Everything from admissions to grading, in one place built for how a
-            university actually runs.&rdquo;
+            &ldquo;Everything from admissions to grading, in one place built for
+            how a university actually runs.&rdquo;
           </p>
 
           <div className="flex items-center gap-8 border-t border-white/20 pt-6">

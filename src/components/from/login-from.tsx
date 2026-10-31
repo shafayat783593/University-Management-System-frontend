@@ -38,8 +38,8 @@ export function LoginForm({ className, ...props }: ComponentProps<"form">) {
 
   const form = useForm({
     defaultValues: {
-      email: "shafayat783@gmail.com",
-      password: "12345678Un@",
+      email: "",
+      password: "",
     } as LoginFormData,
 
     validators: {

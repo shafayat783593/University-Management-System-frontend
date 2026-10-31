@@ -55,7 +55,7 @@ export default function RegisterPage() {
       {/* Image side */}
       <div className="relative hidden lg:block">
         <Image
-          src="/doctorLogin.webp"
+          src="/register.jpg"
           alt="Students walking across the Northfield University campus"
           fill
           priority
