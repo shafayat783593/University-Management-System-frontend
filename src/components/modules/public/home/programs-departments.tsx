@@ -34,7 +34,6 @@ interface ProgramsDepartmentsProps {
   semesterName?: string | null;
 }
 
-// Easy rate card: per-credit tuition on one line, fixed fees below it.
 function RateCard({ fees }: { fees: FeeScheduleLine[] }) {
   if (fees.length === 0) return null;
   const tuition = fees.find((f) => f.calcMethod === "PER_CREDIT");

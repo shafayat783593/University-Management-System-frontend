@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { FetchError } from "ofetch";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { OverdueDuesBanner } from "@/components/modules/student/overdue/overdue-dues-banner";
 
 import { DashboardPageHeader } from "@/components/dashboard/dashboard-ui";
 import type { Section } from "@/components/types";
@@ -366,6 +367,7 @@ export default function EnrollmentsBrowser() {
 
   return (
     <div className="flex flex-col gap-6">
+      <OverdueDuesBanner />
       {/* Persistent banners */}
       {admissionBanner && (
         <div className="flex items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-4" role="alert">

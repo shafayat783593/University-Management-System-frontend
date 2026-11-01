@@ -61,10 +61,15 @@ function BulkBar() {
 
   function handleGenerate() {
     if (!semesterId) return toast.error("Pick a semester.");
+    const scope = studentId.trim() ? "this student" : "every enrolled student";
+    if (!window.confirm(`Generate semester invoices for ${scope}?`)) return;
     generate.mutate(
       { semesterId, studentId: studentId.trim() || undefined },
       {
-        onSuccess: (r) => toast.success(`Created ${r.created.length}, skipped ${r.skipped.length}.`),
+        onSuccess: (r) =>
+          toast.success(
+            `Created ${r.created.length}, supplementary ${r.supplementary.length}, skipped ${r.skipped.length}, failed ${r.failed.length}.`,
+          ),
         onError: (err) => toast.error(getApiErrorMessage(err, "Generation failed.")),
       },
     );
@@ -264,6 +269,9 @@ export default function AdminInvoicesManager() {
         }
       />
 
+      <p className="text-[13px] text-muted-foreground">
+        Run this after enrollment closes so every enrolled student gets an invoice.
+      </p>
       <BulkBar />
 
       <DashboardPanel title="All invoices">

@@ -33,6 +33,7 @@ export function useInitBkashPayment() {
     mutationFn: (installmentId: string) => initBkashPayment(installmentId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: MY_FEES_KEY });
+      invalidateMoneyState(queryClient);
     },
   });
 }
@@ -44,6 +45,7 @@ export function useCancelFeePayment() {
     mutationFn: (installmentId: string) => cancelFeePayment(installmentId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: MY_FEES_KEY });
+      invalidateMoneyState(queryClient);
     },
   });
 }
@@ -57,7 +59,12 @@ function invalidateMoneyState(queryClient: ReturnType<typeof useQueryClient>) {
   void queryClient.invalidateQueries({ queryKey: ["invoices", "my"] });
   void queryClient.invalidateQueries({ queryKey: ["admission-application"] });
   void queryClient.invalidateQueries({ queryKey: ["me"] });
+  void queryClient.invalidateQueries({ queryKey: ["my-summary"] });
+  void queryClient.invalidateQueries({ queryKey: ["my-invoices"] });
+  void queryClient.invalidateQueries({ queryKey: ["my-payments"] });
+  void queryClient.invalidateQueries({ queryKey: ["student-dashboard"] });
   void queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
+  void queryClient.invalidateQueries({ queryKey: ["my-fees"] });
 }
 
 // Start one bKash payment for an invoice, then redirect to bkashURL.

@@ -70,6 +70,9 @@ export default function SemesterInvoiceGenerator() {
         title="Semester invoice"
         subtitle="Generate your semester invoice for enrolled courses, then pay it."
       />
+      <p className="text-[13px] text-muted-foreground">
+        Without an invoice you cannot pay, and the office may generate it for you.
+      </p>
       {semestersQuery.isLoading ? (
         <Skeleton className="h-24 w-full" />
       ) : (

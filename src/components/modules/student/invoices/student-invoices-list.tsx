@@ -18,6 +18,7 @@ import {
   useMyInvoiceSummary,
   useMyInvoices,
 } from "@/hooks";
+import { OverdueDuesBanner } from "@/components/modules/student/overdue/overdue-dues-banner";
 import { getApiErrorMessage } from "@/lib/apiClient";
 import { formatBDT, formatDueDate } from "@/lib/format";
 import { redirectToBkash } from "@/lib/payment";
@@ -335,6 +336,7 @@ export default function StudentInvoicesList({
 
   return (
     <div className="flex flex-col gap-6">
+      <OverdueDuesBanner />
       <DashboardPageHeader
         title={title}
         subtitle={

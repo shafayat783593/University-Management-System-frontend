@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useStudentDashboard } from "@/hooks";
+import { OverdueDuesBanner } from "@/components/modules/student/overdue/overdue-dues-banner";
 
 const toneClasses: Record<"danger" | "warning" | "info" | "success", string> = {
   danger: "border-destructive/30 bg-destructive/5 text-destructive",
@@ -58,6 +59,7 @@ export default function StudentDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
+      <OverdueDuesBanner />
       <DashboardPageHeader
         title={`Welcome back, ${d.profile.name.split(" ")[0]}`}
         subtitle={

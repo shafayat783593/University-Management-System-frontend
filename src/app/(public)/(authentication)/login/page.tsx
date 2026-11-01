@@ -1,6 +1,7 @@
 import { Newsreader } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
+import AdminQuickLogin from "@/components/auth/AdminQuickLogin";
 import GuestGuard from "@/components/auth/guest.guard";
 import { LoginForm } from "@/components/from/login-from";
 
@@ -42,8 +43,9 @@ export default function LoginPage() {
           </Link>
 
           <div className="flex flex-1 items-center">
-            <div className="mx-auto w-full max-w-sm">
+            <div className="mx-auto w-full max-w-sm space-y-4">
               <LoginForm />
+              <AdminQuickLogin />
             </div>
           </div>
 

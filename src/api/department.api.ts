@@ -1,9 +1,5 @@
 import type { ApiResponse } from "@/components/types/api";
 import apiClient from "@/lib/apiClient";
-import { getCourses } from "./admin.api";
-import { getAllInstructorApplications } from "./instructor.api";
-import { getAllSections } from "./sections.api";
-import { getAllSemesters } from "./semesters.api";
 
 export interface DeptCourse {
   id: string;
@@ -46,9 +42,24 @@ export function getAllDepartment() {
 
 // GET /departments/:id — basic department only (backend has no /full route).
 export async function getDepartmentById(id: string) {
-  const res = await apiClient<ApiResponse<DepartmentFullDetails["department"]>>(
-    `/departments/${id}`,
-  );
+  const res = await apiClient<
+    ApiResponse<
+      DepartmentFullDetails["department"] & {
+        courses?: Array<{
+          id: string;
+          code: string;
+          title: string;
+          creditHours: number;
+        }>;
+        instructors?: Array<{
+          id: string;
+          qualification?: string | null;
+          verificationStatus?: string | null;
+          user?: { name?: string | null } | null;
+        }>;
+      }
+    >
+  >(`/departments/${id}`);
   return res.data;
 }
 
@@ -56,30 +67,37 @@ export async function getDepartmentById(id: string) {
 export async function getDepartmentDetails(
   id: string,
 ): Promise<DepartmentFullDetails> {
-  const [department, courses, instructorRes, semesterRes] = await Promise.all([
-    getDepartmentById(id),
-    getCourses(id).catch(() => []),
-    getAllInstructorApplications({
-      verificationStatus: "APPROVED",
-      limit: 50,
-    }).catch(() => ({ data: [] as never[] })),
-    getAllSemesters({ status: "OPEN", limit: 1 }).catch(() => ({
-      items: [] as never[],
-    })),
-  ]);
+  // `getDepartmentById` now returns the department together with its courses
+  // and instructors, so a single (public) request is enough to render the
+  // whole department page instead of a cascade of authenticated ones.
+  const department = await getDepartmentById(id);
 
-  // Backend departmentId filter is unreliable, so filter here.
-  const raw = instructorRes as unknown;
-  const allInstructors = (
-    Array.isArray(raw) ? raw : ((raw as { data?: unknown })?.data ?? [])
-  ) as Array<{
+  type RelCourse = {
     id: string;
-    department?: { id: string };
-    user?: { name: string };
+    code: string;
+    title: string;
+    creditHours: number;
+  };
+  type RelInstructor = {
+    id: string;
+    user?: { name?: string | null } | null;
     qualification?: string | null;
-  }>;
-  const instructors: DeptInstructor[] = allInstructors
-    .filter((i) => i.department?.id === id)
+    verificationStatus?: string | null;
+  };
+  const relDepartment = department as {
+    courses?: RelCourse[];
+    instructors?: RelInstructor[];
+  };
+
+  const courses: DeptCourse[] = (relDepartment.courses ?? []).map((c) => ({
+    id: c.id,
+    code: c.code,
+    title: c.title,
+    creditHours: c.creditHours,
+  }));
+
+  const instructors: DeptInstructor[] = (relDepartment.instructors ?? [])
+    .filter((i) => i.verificationStatus === "APPROVED" || !i.verificationStatus)
     .map(
       (i): DeptInstructor => ({
         id: i.id,
@@ -88,57 +106,15 @@ export async function getDepartmentDetails(
       }),
     );
 
-  const openSemester =
-    (
-      semesterRes as {
-        items?: Array<{
-          id: string;
-          name: string;
-          enrollmentStart?: string | null;
-          enrollmentEnd?: string | null;
-        }>;
-      }
-    )?.items?.[0] ?? null;
-  const currentSemester = openSemester
-    ? {
-        id: openSemester.id,
-        name: openSemester.name,
-        enrollmentStart: openSemester.enrollmentStart ?? null,
-        enrollmentEnd: openSemester.enrollmentEnd ?? null,
-      }
-    : null;
-
-  // Sections of the open semester that belong to this department's courses.
-  let sections: DeptSection[] = [];
-  if (currentSemester) {
-    const sectionRes = await getAllSections({
-      semesterId: currentSemester.id,
-      limit: 50,
-    }).catch(() => ({ items: [] }));
-    sections = (
-      (
-        sectionRes as {
-          items?: Array<{
-            id: string;
-            capacity: number;
-            enrolledCount: number;
-            schedule?: string | null;
-            course?: { code: string; title: string; departmentId?: string };
-            instructor?: { user?: { name: string } };
-          }>;
-        }
-      )?.items ?? []
-    )
-      .filter((s) => s.course?.departmentId === id)
-      .map((s) => ({
-        id: s.id,
-        course: { code: s.course?.code ?? "", title: s.course?.title ?? "" },
-        instructorName: s.instructor?.user?.name ?? "TBA",
-        capacity: s.capacity,
-        enrolledCount: s.enrolledCount,
-        schedule: s.schedule ?? null,
-      }));
-  }
-
-  return { department, courses, instructors, currentSemester, sections };
+  return {
+    department: {
+      id: department.id,
+      name: department.name,
+      code: department.code,
+    },
+    courses,
+    instructors,
+    currentSemester: null,
+    sections: [],
+  };
 }

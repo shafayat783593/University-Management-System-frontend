@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { FetchError } from "ofetch";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ function takeReturnTo(): string {
 
 function CallbackBody() {
   const params = useSearchParams();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const paymentID = params.get("paymentID") ?? "";
   const status = params.get("status") ?? "";
@@ -71,7 +72,10 @@ function CallbackBody() {
       .then((result) => {
         if (!alive) return;
         setState({ kind: "ok", result });
-        if (result.success) refreshMoneyState();
+        if (result.success) {
+          refreshMoneyState();
+          window.setTimeout(() => router.push(returnTo), 800);
+        }
       })
       .catch((err) => {
         if (!alive) return;
@@ -83,7 +87,10 @@ function CallbackBody() {
         const nested = data?.data;
         if (nested && typeof nested.success === "boolean") {
           setState({ kind: "ok", result: nested });
-          if (nested.success) refreshMoneyState();
+          if (nested.success) {
+            refreshMoneyState();
+            window.setTimeout(() => router.push(returnTo), 800);
+          }
         } else {
           setState({
             kind: "fail",

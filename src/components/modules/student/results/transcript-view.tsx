@@ -18,6 +18,7 @@ import {
 import { useTranscript } from "@/hooks";
 import { DuesBlockedNotice, isDuesBlocked } from "./dues-blocked-notice";
 import { TranscriptActions } from "./result-actions";
+import { OverdueDuesBanner } from "@/components/modules/student/overdue/overdue-dues-banner";
 
 export default function TranscriptView() {
   const query = useTranscript();
@@ -34,7 +35,12 @@ export default function TranscriptView() {
 
   // §10: overdue installments block viewing (403) — paying stays open.
   if (query.isError && isDuesBlocked(query.error)) {
-    return <DuesBlockedNotice error={query.error} />;
+    return (
+      <div className="flex flex-col gap-6">
+        <OverdueDuesBanner />
+        <DuesBlockedNotice error={query.error} />
+      </div>
+    );
   }
 
   if (query.isError || !query.data) {
@@ -56,6 +62,7 @@ export default function TranscriptView() {
 
   return (
     <div className="flex flex-col gap-6">
+      <OverdueDuesBanner />
       <DashboardPageHeader
         title="Transcript"
         subtitle={`${transcript.student.user.name} · ${transcript.student.studentIdCode}`}

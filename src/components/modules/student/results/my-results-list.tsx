@@ -16,6 +16,7 @@ import {
 import { useAllMyResults } from "@/hooks";
 import { getApiErrorMessage } from "@/hooks/auth.hook";
 import { DuesBlockedNotice, isDuesBlocked } from "./dues-blocked-notice";
+import { OverdueDuesBanner } from "@/components/modules/student/overdue/overdue-dues-banner";
 
 // One card per course, each listing every exam with
 // marksObtained / totalMarks / status.
@@ -42,6 +43,7 @@ export default function MyResultsList() {
             title="All my results"
             subtitle="Every course, every exam, in one place."
           />
+          <OverdueDuesBanner />
           <DuesBlockedNotice error={query.error} />
         </div>
       );
@@ -92,6 +94,7 @@ export default function MyResultsList() {
 
   return (
     <div className="flex flex-col gap-6">
+      <OverdueDuesBanner />
       <DashboardPageHeader
         title="All my results"
         subtitle={`${courses.length} course${courses.length > 1 ? "s" : ""} total.`}

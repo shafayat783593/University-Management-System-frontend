@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/app/validation";
-import { useLogin, ME_QUERY_KEY } from "@/hooks";
+import { useLogin, ME_QUERY_KEY, getApiErrorMessage } from "@/hooks";
 import { getMe } from "@/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -75,7 +75,7 @@ export function LoginForm({ className, ...props }: ComponentProps<"form">) {
 
         router.push(home);
       } catch (error) {
-        toast.error("Login failed", { description: "Invalid email or password." });
+        toast.error(getApiErrorMessage(error, "Admin login failed"));
       }
     },
   });

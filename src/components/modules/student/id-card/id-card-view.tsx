@@ -106,13 +106,6 @@ export default function IdCardView() {
       onError: (err) => {
         const message = getApiErrorMessage(err, "Download failed.");
         const lower = message.toLowerCase();
-        if (lower.includes("overdue")) {
-          toast.error("You have overdue fees", {
-            description:
-              "Clear your overdue installment first, then download your ID card.",
-          });
-          return;
-        }
         if (lower.includes("id card fee")) {
           toast.error("ID card fee pending", { description: message });
           return;
