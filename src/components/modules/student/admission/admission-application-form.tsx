@@ -58,12 +58,8 @@ function TextField({
 function toPayload(
   values: AdmissionApplicationFormValues,
 ): AdmissionApplicationPayload {
-  const text = (v?: string) => (v?.trim() ? v.trim() : undefined);
-  const num = (v?: string) => {
-    if (!v?.trim()) return undefined;
-    const n = Number(v);
-    return Number.isFinite(n) ? n : undefined;
-  };
+  const text = (v: string) => v.trim();
+  const num = (v: string) => Number(v.trim());
   return {
     previousInstitution: values.previousInstitution.trim(),
     sscBoard: text(values.sscBoard),
@@ -466,12 +462,14 @@ function ApplicationForm({
         <legend className="px-2 text-sm font-bold">SSC</legend>
         <TextField
           label="Board"
+          required
           placeholder="Dhaka"
           error={formState.errors.sscBoard?.message}
           {...register("sscBoard")}
         />
         <TextField
           label="Year"
+          required
           type="number"
           placeholder="2022"
           error={formState.errors.sscYear?.message}
@@ -479,6 +477,7 @@ function ApplicationForm({
         />
         <TextField
           label="GPA (0–5)"
+          required
           type="number"
           step="0.01"
           placeholder="5.00"
@@ -490,12 +489,14 @@ function ApplicationForm({
         <legend className="px-2 text-sm font-bold">HSC</legend>
         <TextField
           label="Board"
+          required
           placeholder="Dhaka"
           error={formState.errors.hscBoard?.message}
           {...register("hscBoard")}
         />
         <TextField
           label="Year"
+          required
           type="number"
           placeholder="2024"
           error={formState.errors.hscYear?.message}
@@ -503,6 +504,7 @@ function ApplicationForm({
         />
         <TextField
           label="GPA (0–5)"
+          required
           type="number"
           step="0.01"
           placeholder="5.00"
@@ -513,12 +515,14 @@ function ApplicationForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField
           label="Guardian occupation"
+          required
           placeholder="Teacher"
           error={formState.errors.guardianOccupation?.message}
           {...register("guardianOccupation")}
         />
         <TextField
           label="Present address"
+          required
           placeholder="House, road, area, city"
           error={formState.errors.presentAddress?.message}
           {...register("presentAddress")}
@@ -526,6 +530,7 @@ function ApplicationForm({
       </div>
       <TextField
         label="Permanent address"
+        required
         placeholder="Village, upazila, district"
         error={formState.errors.permanentAddress?.message}
         {...register("permanentAddress")}

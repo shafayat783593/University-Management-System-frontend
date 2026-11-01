@@ -58,15 +58,15 @@ export interface MyAdmission {
 
 export interface AdmissionApplicationPayload {
   previousInstitution: string;
-  sscBoard?: string;
-  sscYear?: number;
-  sscGpa?: number;
-  hscBoard?: string;
-  hscYear?: number;
-  hscGpa?: number;
-  guardianOccupation?: string;
-  presentAddress?: string;
-  permanentAddress?: string;
+  sscBoard: string;
+  sscYear: number;
+  sscGpa: number;
+  hscBoard: string;
+  hscYear: number;
+  hscGpa: number;
+  guardianOccupation: string;
+  presentAddress: string;
+  permanentAddress: string;
 }
 
 export async function getMyAdmissionApplication() {

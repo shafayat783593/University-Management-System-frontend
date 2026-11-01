@@ -1,36 +1,35 @@
 import z from "zod";
 
-// Only `previousInstitution` is required; everything else is optional.
-// Year/GPA stay strings in the form (HTML inputs return strings) and are
+// All admission fields are required. Year/GPA stay strings in the form (HTML inputs return strings) and are
 // converted to numbers in the submit handler.
-const optionalYear = z
+const requiredYear = z
   .string()
-  .optional()
+  .trim()
   .refine(
-    (v) => !v || (/^\d{4}$/.test(v.trim()) && +v >= 1990 && +v <= 2100),
+    (v) => /^\d{4}$/.test(v) && +v >= 1990 && +v <= 2100,
     "Year must be between 1990 and 2100",
   );
 
-const optionalGpa = z
+const requiredGpa = z
   .string()
-  .optional()
+  .trim()
   .refine((v) => {
-    if (!v) return true;
+    if (!v) return false;
     const n = Number(v);
     return Number.isFinite(n) && n >= 0 && n <= 5;
-  }, "GPA must be between 0 and 5");
+  }, "GPA is required and must be between 0 and 5");
 
 export const admissionApplicationSchema = z.object({
-  previousInstitution: z.string().min(2, "Previous institution is required"),
-  sscBoard: z.string().optional(),
-  sscYear: optionalYear,
-  sscGpa: optionalGpa,
-  hscBoard: z.string().optional(),
-  hscYear: optionalYear,
-  hscGpa: optionalGpa,
-  guardianOccupation: z.string().optional(),
-  presentAddress: z.string().optional(),
-  permanentAddress: z.string().optional(),
+  previousInstitution: z.string().trim().min(2, "Previous institution is required"),
+  sscBoard: z.string().trim().min(1, "SSC board is required"),
+  sscYear: requiredYear,
+  sscGpa: requiredGpa,
+  hscBoard: z.string().trim().min(1, "HSC board is required"),
+  hscYear: requiredYear,
+  hscGpa: requiredGpa,
+  guardianOccupation: z.string().trim().min(1, "Guardian occupation is required"),
+  presentAddress: z.string().trim().min(1, "Present address is required"),
+  permanentAddress: z.string().trim().min(1, "Permanent address is required"),
 });
 
 export type AdmissionApplicationFormValues = z.infer<
