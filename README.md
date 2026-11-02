@@ -1,227 +1,172 @@
-# University Management System
+# University Management System — Client (Web)
 
-A full-stack university platform: online admission with approval, invoice-based fee and payment management (bKash), course enrollment, attendance, exams and results, transcripts, and role-based dashboards for students, instructors and administrators.
+Next.js frontend for the University Management System: student admission and fee payment, course enrollment, results, instructor tools (sections, attendance, exams) and the admin back office.
 
-- **Backend:** Express 5 · TypeScript · Prisma 7 · PostgreSQL · Redis
-- **Frontend:** Next.js 16 (App Router) · React 19 · Tailwind CSS 4 · shadcn/ui · TanStack Query
-- **Repos:** [`University-Management-System-server`](https://github.com/shafayat783593/University-Management-System-server) (this API) and the Next.js client
+- **Stack:** Next.js 16 (App Router) · React 19 · Tailwind CSS v4 · shadcn/ui (Base UI) · TanStack Query v5 · ofetch · react-hook-form + Zod · framer-motion
+- **Backend:** a separate Express API (`University-Management-System-server`). This app does nothing without it running.
 
-## Features
+## Requirements
 
-| Area | What it does |
-|---|---|
-| **Auth** | Email + password with OTP email verification, Google sign-in, JWT access/refresh tokens in HTTP-only cookies, password reset, role-based access (`STUDENT`, `INSTRUCTOR`, `ADMIN`) |
-| **Admission** | Student creates an account → optionally pays an application fee → submits an application → admin approves/rejects (with reason) → student pays the admission invoice → admission confirmed and a Student ID (e.g. `CSE-26-0001`) is generated |
-| **Billing** | Admin-defined fee policies (flat or per-credit tuition, scoped globally, by department or by semester), installment policies, waivers and scholarships, adjustments, late fees, cancellations |
-| **Payments** | bKash tokenized checkout, idempotent callback handling, PDF receipts, admin refunds (with optional charge reversal), payment re-verification |
-| **Academics** | Departments, courses (with prerequisites), semesters, sections, enrollments, class routines |
-| **Attendance and exams** | Attendance sessions, exams (single and bulk), result submission and publishing, admin overrides, transcript PDF (download/email) |
-| **Instructors** | Public application with résumé upload, admin verification |
-| **Admin** | Dashboard, announcements, reports (collection, outstanding, overdue), settings, audit log |
-| **Access gates** | Admission confirmation and overdue-installment checks gate enrollment, results, transcript and ID card (paying, dropping and withdrawing are never blocked) |
-
-## How the student journey works
-
-```
-Register / Google login
-        │
-  Complete profile (department + phone)
-        │
-  [optional] Pay application fee ──▶ bKash ──▶ /payment/callback
-        │
-  Submit admission application
-        │
-  Admin reviews: APPROVED / REJECTED (reason)
-        │
-  Pay admission invoice (admission + ID card + refundable caution deposit)
-        │
-  Admission confirmed · Student ID issued
-        │
-  Enroll in sections ──▶ generate semester invoice (tuition = credits × rate + fixed fees, waivers applied)
-        │
-  Pay installments ──▶ receipt PDF
-```
-
-## Tech stack
-
-**Backend:** Node.js, Express 5, TypeScript, Prisma 7 (`@prisma/adapter-pg`), PostgreSQL, Redis, Zod 4, JWT, bcryptjs, Nodemailer + EJS templates, PDFKit, Cloudinary (images and résumés), Google Auth Library, `rate-limiter-flexible`, Vitest, tsup, Biome.
-
-**Frontend:** Next.js 16, React 19, Tailwind CSS v4, shadcn/ui (Base UI), react-hook-form + Zod, TanStack Query v5, ofetch, sonner, recharts.
-
-## Project structure (backend)
-
-```
-prisma/
-  schema/            # multi-file Prisma schema (user, academic, payment, announcement, enum)
-  migrations/
-src/
-  app.ts             # Express app, CORS, route mounting (/api/v1/...)
-  server.ts          # DB + Redis + SMTP connect, seeding, listen
-  generated/prisma/  # generated client (git-ignored)
-  app/
-    config/          # env loading
-    lib/             # billing math, invoice core, dues gates, bKash client, PDFs, mail, Redis
-    middleware/      # auth, validateRequest, requireNoDues, error handler
-    module/          # feature modules: controller / service / route / validation / interface
-      auth  admission  department  course  semester  section  enrollment
-      attendance  exam  result  transcript  routine  announcement
-      feePolicy  invoice  payment  waiver  setting  dashboard  public  Instructor  auditlog
-    templates/       # EJS emails and PDFs
-    utils/           # catchAsync, sendResponse, AppError, seeds
-```
-
-All endpoints return `{ success, statusCode, message, data, meta? }`. Money is stored as `Decimal(12,2)` and calculated in integer paisa (`toMinor` / `fromMinor`); the API returns BDT numbers.
+- Node.js 20+ and npm
+- The API running and reachable (see the server README), with the same migrations applied
+- Server `.env`: `FRONTEND_URL` must equal this app's exact origin, and `BKASH_CALLBACK_URL` must point to this app's `/payment/callback` page
 
 ## Getting started
 
-### Prerequisites
-- Node.js 20+ and npm
-- PostgreSQL
-- Redis
-- An SMTP account (for OTP and receipts)
-- A Cloudinary account (profile images, résumés)
-- A Google OAuth client ID (Google sign-in)
-- bKash tokenized checkout **sandbox** credentials (payments)
-
-### Install and run
 ```bash
-git clone https://github.com/shafayat783593/University-Management-System-server.git
-cd University-Management-System-server
-npm install                       # also runs `prisma generate`
-cp .env.example .env              # then fill in the values below
-npx prisma migrate dev            # create/update the database
-npm run dev                       # http://localhost:<PORT>
-```
-On startup the server connects to PostgreSQL, Redis and SMTP, then seeds a tester admin from the `TESTER_ADMIN_*` variables. If any connection fails, it exits.
-
-### Scripts
-| Command | Purpose |
-|---|---|
-| `npm run dev` | Start with watch mode (`tsx`) |
-| `npm run build` | Bundle with `tsup` |
-| `npm start` | Run the built server (`dist/server.js`) |
-| `npm test` | Run Vitest (billing math, allocation, installment planning) |
-| `npx prisma migrate dev` | Apply schema changes in development |
-| `npx prisma generate` | Regenerate the client |
-| `npx tsc --noEmit` | Type-check |
-
-## Environment variables
-
-```env
-NODE_ENV=development
-PORT=5000
-APP_URL=http://localhost:5000
-FRONTEND_URL=http://localhost:3000        # must equal the frontend origin exactly (CORS + cookies)
-DATABASE_URL=postgresql://user:pass@localhost:5432/ums
-
-BCRYPT_SALT_ROUNDS=10
-JWT_ACCESS_SECRET=change-me
-JWT_REFRESH_SECRET=change-me-too
-JWT_ACCESS_EXPIRES_IN=1d
-JWT_REFRESH_EXPIRES_IN=30d
-
-GOOGLE_CLIENT_ID=
-
-REDIS_HOST=
-REDIS_PORT=
-REDIS_USER=
-REDIS_PASSWORD=
-
-SMTP_USER=
-SMTP_PASSWORD=
-EMAIL_SENDER="University <no-reply@example.edu>"
-
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-
-# bKash tokenized checkout
-BKASH_BASE_URL=https://tokenized.sandbox.bka.sh/v1.2.0-beta
-BKASH_USERNAME=
-BKASH_PASSWORD=
-BKASH_APP_KEY=
-BKASH_APP_SECRET=
-BKASH_CALLBACK_URL=http://localhost:3000/payment/callback   # a FRONTEND page, not the API
-
-# Seeded accounts
-SUPER_ADMIN_NAME=
-SUPER_ADMIN_EMAIL=
-SUPER_ADMIN_PASSWORD=
-TESTER_ADMIN_NAME=
-TESTER_ADMIN_EMAIL=
-TESTER_ADMIN_PASSWORD=
-TESTER_DOCTOR_NAME=
-TESTER_DOCTOR_EMAIL=
-TESTER_DOCTOR_PASSWORD=
+git clone <client-repo-url>
+cd <client-folder>
+npm install
+npm run dev                    # http://localhost:3000
 ```
 
-Frontend `.env.local`:
+`.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=
 ```
 
-## First-time setup (as admin)
-
-Billing will not work until these exist. Create them in this order:
-
-1. **Departments**, **semester** (set status `OPEN`), **courses**, then **sections** (a section needs a verified instructor).
-2. **Fee policies** (global unless noted):
-   | Invoice type | Item | Method | Example |
-   |---|---|---|---|
-   | Application | Application | Flat | ৳1,000 |
-   | Admission | Admission | Flat | ৳5,000 |
-   | Admission | ID card | Flat | ৳100 |
-   | Admission | Caution deposit (refundable) | Flat | ৳3,000 |
-   | Semester | Tuition | **Per credit** | ৳3,500 |
-   | Semester | Registration / lab / exam / library | Flat | per semester |
-   Admission policies must **not** be scoped to a semester: an admission invoice is created before any semester is known.
-3. *(Optional)* **Installment policy** for a semester or as the default. Without one, a semester invoice is a single payment.
-4. **Settings:** `applicationFeeRequired` (pay before submitting), `admissionPaymentRequiredToEnroll` (confirm admission only after payment).
-
-## Testing payments locally
-
-1. Use bKash **sandbox** credentials. Set `BKASH_CALLBACK_URL` to your frontend `/payment/callback` page.
-2. Create a fresh student → pay application fee → submit → approve as admin → pay the admission invoice → enroll.
-3. A student whose admission was already confirmed cannot be re-tested; use a new account or reset `admissionConfirmedAt` and `studentIdCode` for that profile.
-
-## API overview
-
-Base path: `/api/v1`
-
-| Path | Purpose |
+| Command | Purpose |
 |---|---|
-| `/auth` | register, verify email, login, Google login, refresh, profile, ID card |
-| `/admission-applications` | student application, admin review |
-| `/departments` `/courses` `/semesters` `/sections` | academic structure |
-| `/enrollments` `/attendance` `/exams` `/results` `/routines` `/transcript` | academic operations |
-| `/fee-policies` | fee policies and installment policies |
-| `/waivers` | scholarships, waivers, discounts |
-| `/invoices` | invoices, semester generation, adjustments, cancellation, late fees, reports |
-| `/payments` | init, bKash callback, verify, history, receipts, refunds, collection report |
-| `/settings` | system settings |
-| `/announcements` `/public` `/dashboard` `/instructors` | content and dashboards |
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm start` | Run the production build |
+| `npx tsc --noEmit` | Type-check |
 
-Full request/response shapes live in `API_CONTRACT.md`; frontend scope in `PRD.md` and `TASKS.md`.
+## Roles and home pages
 
-## Deployment (Vercel)
+| Role | Home | Shared pages |
+|---|---|---|
+| Student | `/student` | `/profile`, `/logout` |
+| Instructor | `/instructor` | `/profile`, `/logout` |
+| Admin | `/admin` | `/profile`, `/logout` |
 
-`vercel.json` and the `vercel-build` script (`prisma generate`) are included. Set all environment variables in the project settings, point `FRONTEND_URL` at the deployed frontend origin, and run `npx prisma migrate deploy` against the production database. Because the frontend and API are on different origins, cookies need `SameSite=None; Secure` and HTTPS.
+Each home page is driven by one dashboard endpoint (`GET /dashboard/student`, `/instructor`, `/admin`). Use `getHomePath(role)` from `src/lib/auth-redirect.ts` instead of hard-coding these paths.
+
+## Project structure
+
+```
+src/
+  app/
+    (public)/
+      (authentication)/
+        layout.tsx
+        (guest)/            # login, register — only for logged-out visitors
+          layout.tsx        # <AuthGuard guestOnly>
+          login/  register/
+        account-verify/  instructor-apply/  instructors/
+      (marketing)/          # public landing pages
+    (dashboard)/            # layout with sidebar + AuthGuard; admin / instructor / student areas
+    payment/                # /payment/callback — public, bKash returns here
+    terms/  privacy/        # legal pages
+    logout/
+  components/
+    auth/                   # AuthGuard, RoleGuard, AccessDenied, account gates, loading
+    dashboard/  layout/  legal/  from/ (auth forms)
+  modules/                  # feature code by role
+    admin/                  # admissions, announcements, audit-logs, courses, dashboard,
+                            # departments, fee-policies, ...
+    student/  instructor/
+  hooks/                    # one TanStack Query hook per resource (useGetMe, ...)
+  lib/                      # api client, auth-redirect, overdue helpers, formatters
+```
+
+## Authentication and guards
+
+- The API is on a **different origin**, so Next.js middleware cannot read the auth cookie. Guards run on the client by calling `/auth/me` through `useGetMe`.
+- **`<AuthGuard>`** (dashboard layout) requires a logged-in user and applies, in order:
+  1. **Password gate**: a temporary password (`needPasswordChange`) must be changed first. Only `/profile` and `/logout` stay open.
+  2. **Profile gate**: a student with no `studentProfile` must finish `/complete-profile`.
+  3. **Admission gate**: a student with no admission application is limited to the application pages until they apply.
+- **`<AuthGuard guestOnly>`** wraps `login` and `register`. A logged-in user is redirected to their home page, and logged-out visitors see the form. Never show the form while the user query is still loading.
+- **`<RoleGuard>`** keeps each area to its role and shows `AccessDenied` otherwise.
+- `useGetMe` must use `retry: false` for 401s. After login, **invalidate** the `me` query; on logout, **clear** the whole query cache. Otherwise a stale logged-out or logged-in state redirects the wrong way.
+
+## Student journey in the UI
+
+```
+Register / Google ─▶ /complete-profile ─▶ [pay application fee] ─▶ admission application
+   ─▶ admin review (approved / rejected + reason) ─▶ pay admission invoice (bKash)
+   ─▶ Student ID issued ─▶ enroll in sections ─▶ generate semester invoice
+   ─▶ pay installments ─▶ download receipt
+```
+
+The student dashboard shows a single **next step** computed by the server (pay overdue, pay application fee, start application, under review, rejected, pay admission, no open semester, enroll, generate semester invoice, all set). Render it as the primary call to action; do not recompute it on the client.
+
+### Gates the UI must explain (never show a raw error)
+
+| Server response | What to show |
+|---|---|
+| `402` on application submit | Step 1: pay the application fee |
+| `403` admission not confirmed | "Pay your admission fee" with a link to My fees |
+| `403` `Overdue payment: installment N …` | Overdue card with amount, due date and **Pay now** |
+| `409` | The specific message (already applied, invoice exists, and so on) |
+| `studentIdCode == null` | "Pending admission confirmation", never an empty ID |
+
+Overdue students are blocked from **enrolling, results and transcript only**. Paying, dropping, withdrawing, the dashboard, attendance, routine and the **ID card** keep working (the ID card is unlocked by paying its own ID card invoice). `isOverdueError()` in `src/lib/overdue.ts` detects the 403, and `<OverdueDuesBanner/>` shows the banner on the dashboard, My fees, enrollment, results and transcript pages.
+
+## Money and payments
+
+- Amounts are BDT numbers. Format with `Intl.NumberFormat("en-BD", { style: "currency", currency: "BDT" })`.
+- **Never compute payable, outstanding or overdue values on the client.** Show what the API returns.
+- The "Pay" amount is chosen by the server (next unpaid installment) unless the invoice allows partial payment.
+- Installment status shown to users: `PENDING`, `PARTIALLY_PAID`, `PAID`, `OVERDUE` (overdue is derived by the server).
+- Admin adjustments, waivers and cancellations always require a reason of at least 5 characters.
+- The cancel form only appears on an invoice that is not cancelled and has `paidAmount = 0`. A paid invoice needs a refund first.
+
+### bKash flow
+
+1. `POST /payments/init` returns `{ transactionId, paymentID, bkashURL, amount }`. Save `payReturnTo` in `sessionStorage`, then `window.location.href = bkashURL`.
+2. bKash sends the browser to `/payment/callback?paymentID=…&status=…`.
+3. That page calls `GET /payments/bkash/callback` **once** (guard against the React strict-mode double run), shows success or failure, offers the receipt PDF, and continues to `payReturnTo`.
+4. The callback is idempotent, so refreshing is safe. If a tab was closed mid-payment, the student can re-check with `POST /payments/:id/verify` from the payment history.
+
+After any payment, verify, init or cancel mutation, invalidate: `["me"]`, the student dashboard, `["my-invoices"]`, `["my-summary"]`, `["my-payments"]` and the overdue query, so banners and blocks disappear without a refresh.
+
+## Instructor area
+
+- **Sections:** every section lists its lead instructor and co-instructors. All of them can take attendance, create exams and submit results for that section.
+- **Admin section form:** pick the lead instructor, then optionally add co-instructors (up to 10). Saving an edit **replaces** the co-instructor list.
+- **Dashboard:** assigned sections, pending actions (attendance to take, results to submit), upcoming exams and today's routine.
+
+## Admin area
+
+- **Fee policies** and **installment policies**: create, edit, activate. A fee policy only lets you change its name, amount, refundable flag, end date and active flag; make a new policy for anything else. Do not mark tuition as refundable.
+- **Invoices:** list, detail, adjust, cancel, and **Bulk generate** (run after enrollment closes so every enrolled student has a semester invoice). The result dialog shows created, supplementary, skipped and failed counts.
+- **Reports:** collection, outstanding, overdue. **Settings:** application fee required, admission payment required to enroll.
+- Admission review queue: approve, or reject with a reason.
+
+## Conventions
+
+- One shared `ofetch` client with `credentials: "include"`. Errors come from `FetchError.data.message`; branch on `.status` (402, 403, 409).
+- API envelope: `{ success, statusCode, message, data, meta? }`.
+- One TanStack Query hook per resource. Every data page has loading, empty and error states.
+- shadcn here is the Base UI variant: no `asChild`; use `render` or plain elements.
+- Works at 375 px width and in dark mode. Use theme tokens, not hard-coded colors.
+- PDFs (receipt, transcript, ID card) use `responseType: "blob"` and an object-URL download.
+
+## Legal pages
+
+`/terms` and `/privacy` are public and contain placeholders (`[University Name]`, support email, effective date, retention periods). Fill them in before launch.
+
+## Troubleshooting
+
+| Symptom | Cause and fix |
+|---|---|
+| Logged in, but `/login` still shows the form | The `me` query is stale or `retry` is on. Invalidate `me` after login, and set `retry: false` |
+| After logout, `/login` bounces to the dashboard | The query cache was not cleared on logout |
+| CORS error or cookie not sent | Server `FRONTEND_URL` must equal this origin exactly, and the cookie needs `SameSite=None; Secure` over HTTPS in production |
+| bKash returns to a 404 | `BKASH_CALLBACK_URL` on the server must be this app's `/payment/callback` |
+| Payment succeeds but the page shows no change | A mutation did not invalidate the money queries (see the list above) |
+| Overdue banner never shows | The installment is not past `dueDate + graceDays`, or the student has no semester invoice |
+| Raw 403 toast on enroll, results or transcript | The error handler is not calling `isOverdueError()` |
 
 ## Known limitations
 
-- No background jobs: late fees must be applied manually (`POST /invoices/late-fees/apply`); unpaid admission invoices never expire; stuck payments are re-checked only on demand.
-- Dropping a course after a semester invoice is issued does not shrink the invoice; an admin must adjust or cancel and regenerate it.
-- No cash or bank payment entry; bKash only.
-- No student self-service refunds. The application fee is non-refundable.
-- Approval emails are not sent (only the admission-confirmed email).
-- The audit-log route exists but may not be mounted in `app.ts`.
-- Enrollment window dates (`enrollmentStart` / `enrollmentEnd`) are not yet enforced.
-- Integration tests and bKash sandbox end-to-end tests are not included; unit tests cover the billing math.
-
-## Roadmap
-
-Scheduled jobs (late fees, reminders, invoice expiry), manual payment entry, refund-policy rules, approval emails, enrollment-window enforcement, richer reports, and integration tests.
+- The `AdmissionGate` copy was written before the fee/approval rewrite and may be out of date.
+- There is no realtime update; data refreshes on navigation and after mutations.
+- English only.
+- Instructors cannot view saved exam results (no read endpoint yet).
 
 ## License
 
